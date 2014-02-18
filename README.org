@@ -14,7 +14,7 @@
    )
   ])
 #+END_SRC
-* plan [5/5]
+* plan [5/9]
 - [X] read and eval the archive-contents in ~/.emacs.d/elpa (check variable package-archive-contents)
 - [X]  installed package (it's defined in package-alist)
 #+BEGIN_SRC elisp
@@ -23,8 +23,17 @@
 - [X] package the files and put it in an output dir (just use tar), how to detect the directory? ::
 See function package-load-all-descriptors , check the variable package-directory-list.
 - [X] generate html/javascript file for search, that's easy
-- [ ] just use tar command in emacs, looks tar-mode in emacs is very basic, so we use system tar instead, please note you need exclude elc file
+- [X] just use tar command in emacs, looks tar-mode in emacs is very basic, so we use system tar instead, please note you need exclude elc file
 - [ ] write the archive-contents
+#+BEGIN_SRC elisp
+(defun wg-write-sexp-to-file (sexp file)
+  "Write the printable representation of SEXP to FILE."
+  (with-temp-buffer
+    (let ((print-level nil)  (print-length nil))
+      (insert (format "%S" sexp)))
+    (write-file file)))
+#+END_SRC
+
 - [ ] how package get the archive-contents, for local path, it only support abosolute path
 could be local file content, read package--with-work-buffer. all it matters is http
 - [ ] what's the queue system? use email, some email template.
