@@ -14,9 +14,9 @@
    )
   ])
 #+END_SRC
-* plan [5/9]
+* plan [6/9]
 - [X] read and eval the archive-contents in ~/.emacs.d/elpa (check variable package-archive-contents)
-- [X]  installed package (it's defined in package-alist)
+- [X] installed package (it's defined in package-alist)
 #+BEGIN_SRC elisp
 (zenburn-theme . [(2 1) nil "A low contrast color theme for Emacs."])
 #+END_SRC
@@ -34,8 +34,8 @@ See function package-load-all-descriptors , check the variable package-directory
     (write-file file)))
 #+END_SRC
 
-- [ ] how package get the archive-contents, for local path, it only support abosolute path
+- [X] how package get the archive-contents, for local path, it only support abosolute path
 could be local file content, read package--with-work-buffer. all it matters is http
 - [ ] what's the queue system? use email, some email template.
 - [ ] a Queue system based on email, see [[http://stackoverflow.com/questions/18361233/gmail-sending-limits]] for details, let the developer handle it by himself.
-
+* do it
