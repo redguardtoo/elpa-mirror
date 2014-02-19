@@ -21,7 +21,7 @@
 (zenburn-theme . [(2 1) nil "A low contrast color theme for Emacs."])
 #+END_SRC
 - [X] package the files and put it in an output dir (just use tar), how to detect the directory? ::
-See function package-load-all-descriptors , check the variable package-directory-list.
+See function package-load-all-descriptors , check the variable package-user-dir.
 - [X] generate html/javascript file for search, that's easy
 - [X] just use tar command in emacs, looks tar-mode in emacs is very basic, so we use system tar instead, please note you need exclude elc file
 - [ ] write the archive-contents
