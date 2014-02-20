@@ -1,6 +1,7 @@
 (setq elpamr-default-output-directory "~/myelpa")
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
+  "We can use package-alist directly. This one just append my meta info into package-alist"
   (let ((name (car pkg))
         item
         package-content
@@ -27,37 +28,51 @@
     item
     ))
 
-(defun elpamr--version-num-from-dirname (dirname)
+(defun elpamr--pkg-installed (pkg-info)
+  (let ((name (nth 0 pkg-info))
+        (version (nth 1 pkg-info)))
+    (let ((i 0) found item)
+      (while (and (not found)
+                  (< i (length package-archive-contents)))
+        (setq i (1+ i))
+        ))
+    ))
+
+(defun elpamr-package-info (dirname)
   "return '(package-name integer-version-number) or nil"
   (interactive)
-  (let (rlt)
-    (setq rlt '(1000 "test1"))
+  (let (rlt name version)
+    (when (string-match "\\(.*\\)-\\([0-9.]+\\)$" dirname)
+      (setq name (match-string 1 dirname))
+      (setq version (split-string (match-string 2 dirname) "\\."))
+      (setq rlt (list name version))
+      (message "rlt=%s" rlt)
+      )
+    rlt
     ))
 
 (defun elpamr-create-mirror ()
   "export and packages pkg into a new directory.create all the necessary web files for a mirror site"
   (interactive)
-  (let (item rlt pkg-dirname)
+  (let (item rlt pkg-dirname pkg-info)
     (dolist (pkg package-alist)
       (setq item (elpamr--create-one-item-for-archive-contents pkg))
       (push item rlt)
-      ;; (message "pkg=%s" pkg)
       )
     ;; (message "rlt=%s" rlt)
     ;; package the tar
     ;; instead we scan all the sub-directories in ~/.emacs.d/elpa
     (dolist (dir (directory-files package-user-dir))
-      (unless  (member dir '("archives" "." ".."))
+      (unless (or (member dir '("archives" "." ".."))
+                  (not (setq pkg-info (elpamr-package-info dir))))
         (message "dir=%s" dir)
+        (message "pkg-info=%s" pkg-info)
         )
       ;; extract dir with name and version, version should be converted into a number
       ;; compare with the version in the list (that version should also be a number
       ;; if both package name and version match, than package it, else just ignore
       ;; because we don't want to deal with orphan packages
       )
-    ;; (dolist (pkg rlt)
-    ;;   (setq pkg-dirname (elpamr--pkg-dirname pkg))
-	;;   )
     ))
 
 (provide 'elpa-mirror)
