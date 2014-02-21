@@ -38,7 +38,7 @@
         ))
     ))
 
-(defun elpamr-package-info (dirname)
+(defun elpamr--package-info (dirname)
   "return '(package-name integer-version-number) or nil"
   (interactive)
   (let (rlt name version)
@@ -46,15 +46,19 @@
       (setq name (match-string 1 dirname))
       (setq version (split-string (match-string 2 dirname) "\\."))
       (setq rlt (list name version))
-      (message "rlt=%s" rlt)
+      ;; (message "rlt=%s" rlt)
       )
     rlt
     ))
 
+(defun elpamr--full-path-with-parent (parent filename)
+  (message "parent=%s filename=%s" parent filename)
+  (file-truename (concat (file-name-as-directory parent) filename)))
+
 (defun elpamr-create-mirror ()
   "export and packages pkg into a new directory.create all the necessary web files for a mirror site"
   (interactive)
-  (let (item rlt pkg-dirname pkg-info)
+  (let (item rlt pkg-dirname pkg-info tar-cmd)
     (dolist (pkg package-alist)
       (setq item (elpamr--create-one-item-for-archive-contents pkg))
       (push item rlt)
@@ -62,17 +66,31 @@
     ;; (message "rlt=%s" rlt)
     ;; package the tar
     ;; instead we scan all the sub-directories in ~/.emacs.d/elpa
-    (dolist (dir (directory-files package-user-dir))
-      (unless (or (member dir '("archives" "." ".."))
-                  (not (setq pkg-info (elpamr-package-info dir))))
-        (message "dir=%s" dir)
-        (message "pkg-info=%s" pkg-info)
-        )
-      ;; extract dir with name and version, version should be converted into a number
-      ;; compare with the version in the list (that version should also be a number
-      ;; if both package name and version match, than package it, else just ignore
-      ;; because we don't want to deal with orphan packages
+    (unless (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
+      (setq elpamr-default-output-directory (read-directory-name "Output directory:"))
       )
+
+    (when (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
+      (dolist (dir (directory-files package-user-dir))
+        (unless (or (member dir '("archives" "." ".."))
+                    (not (setq pkg-info (elpamr--package-info dir))))
+          ;; package tar
+          (message "dir=%s" dir)
+          (message "elpamr-default-output-directory=%s" elpamr-default-output-directory)
+          (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--full-path-with-parent elpamr-default-output-directory dir) ".tar --exclude=*.elc --exclude=*~ " dir))
+          (message "tar-cmd=%s" tar-cmd)
+          (shell-command tar-cmd)
+          ;; output archive-contents
+          (with-temp-buffer
+            (let ((print-level nil)  (print-length nil))
+              (insert (format "%S" rlt)))
+            (write-file (file-truename (concat (file-name-as-directory elpamr-default-output-directory) "archive-contents"))))
+          )
+        ;; extract dir with name and version, version should be converted into a number
+        ;; compare with the version in the list (that version should also be a number
+        ;; if both package name and version match, than package it, else just ignore
+        ;; because we don't want to deal with orphan packages
+        ))
     ))
 
 (provide 'elpa-mirror)
