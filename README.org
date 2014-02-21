@@ -1,4 +1,4 @@
-* generail
+* general
 * format
 #+BEGIN_SRC elisp
 (ada-mode ;; package name
