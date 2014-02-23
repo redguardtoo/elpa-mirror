@@ -58,7 +58,7 @@
 (defun elpamr-create-mirror ()
   "export and packages pkg into a new directory.create all the necessary web files for a mirror site"
   (interactive)
-  (let (item rlt pkg-dirname pkg-info tar-cmd)
+  (let (item rlt pkg-dirname pkg-info tar-cmd len dirs)
     (dolist (pkg package-alist)
       (setq item (elpamr--create-one-item-for-archive-contents pkg))
       (push item rlt)
@@ -71,26 +71,30 @@
       )
 
     (when (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
-      (dolist (dir (directory-files package-user-dir))
+      (setq dirs (directory-files package-user-dir))
+      (setq len (length dirs))
+      (dolist (dir dirs)
         (unless (or (member dir '("archives" "." ".."))
                     (not (setq pkg-info (elpamr--package-info dir))))
           ;; package tar
-          (message "dir=%s" dir)
-          (message "elpamr-default-output-directory=%s" elpamr-default-output-directory)
+          ;; (message "dir=%s" dir)
+          ;; (message "elpamr-default-output-directory=%s" elpamr-default-output-directory)
           (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--full-path-with-parent elpamr-default-output-directory dir) ".tar --exclude=*.elc --exclude=*~ " dir))
-          (message "tar-cmd=%s" tar-cmd)
-          (shell-command tar-cmd)
-          ;; output archive-contents
-          (with-temp-buffer
-            (let ((print-level nil)  (print-length nil))
-              (insert (format "%S" rlt)))
-            (write-file (file-truename (concat (file-name-as-directory elpamr-default-output-directory) "archive-contents"))))
-          )
+          ;; (message "tar-cmd=%s" tar-cmd)
+          (shell-command tar-cmd))
+
         ;; extract dir with name and version, version should be converted into a number
         ;; compare with the version in the list (that version should also be a number
         ;; if both package name and version match, than package it, else just ignore
         ;; because we don't want to deal with orphan packages
-        ))
+        )
+
+      ;; output archive-contents
+      (with-temp-buffer
+        (let ((print-level nil)  (print-length nil))
+          (insert (format "%S" rlt)))
+        (write-file (file-truename (concat (file-name-as-directory elpamr-default-output-directory) "archive-contents"))))
+      )
     ))
 
 (provide 'elpa-mirror)
