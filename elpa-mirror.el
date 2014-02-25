@@ -66,9 +66,11 @@
     rlt
     ))
 
-(defun elpamr--full-path-with-parent (parent filename)
-  ;; (message "parent=%s filename=%s" parent filename)
-  (file-truename (concat (file-name-as-directory parent) filename)))
+(defun elpamr--output-fullpath (file)
+  "return full path of output file give the FILE"
+  (file-truename (concat
+                  (file-name-as-directory elpamr-default-output-directory)
+                  file)))
 
 (defun elpamr-create-mirror ()
   "export and packages pkg into a new directory.create all the necessary web files for a mirror site"
@@ -92,7 +94,7 @@
           ;; package tar
           ;; (message "dir=%s" dir)
           ;; (message "elpamr-default-output-directory=%s" elpamr-default-output-directory)
-          (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--full-path-with-parent elpamr-default-output-directory dir) ".tar --exclude=*.elc --exclude=*~ " dir))
+          (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--output-fullpath dir) ".tar --exclude=*.elc --exclude=*~ " dir))
           ;; (message "tar-cmd=%s" tar-cmd)
           (shell-command tar-cmd))
 
@@ -109,7 +111,7 @@
           ;; well, that's required, I don't know why
           (setq rlt (cons 1 rlt))
           (insert (format "%S" rlt)))
-        (write-file (file-truename (concat (file-name-as-directory elpamr-default-output-directory) "archive-contents"))))
+        (write-file (elpamr--output-fullpath "archive-contents")))
       )
     ))
 
