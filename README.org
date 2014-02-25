@@ -39,3 +39,7 @@ could be local file content, read package--with-work-buffer. all it matters is h
 - [ ] what's the queue system? use email, some email template.
 - [ ] a Queue system based on email, see [[http://stackoverflow.com/questions/18361233/gmail-sending-limits]] for details, let the developer handle it by himself.
 * do it
+check "(file-name-directory load-file-name)" for script path
+* how to test
+export packages into some directory,
+add absolute path in a new .emacs

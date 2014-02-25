@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="" />
+        <title>My Emacs packages</title>
+        <style type="text/css"></style>
+    </head>
+    <body>
+
+        <form method="post" id="searchForm" action="">
+            <p>
+                <label for="filter">Filter:</label>
+                <input id="filter" type="text" />
+                <input type="button" value="reset" />
+            </p>
+        </form>
+
+        <div id="pkgList">
+            <table>
+                <thead>
+                    <th>Package</th>
+                    <th>Description</th>
+                </thead>
+                <tbody>
+                    <@=listPackages@>
+                </tbody>
+            </table>
+        </div>
+
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min.js"></script>
+        <script type="text/javascript" src="elpa-mirror.js"></script>
+    </body>
+</html>

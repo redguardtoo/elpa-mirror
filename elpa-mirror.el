@@ -25,6 +25,21 @@
       ;; make do with installed package, looks it's deleted in archive-contents
       (setq item pkg))
 
+    (let ((a (cdr item)) na)
+      (when (= 5 (length a))
+        ;; only need first four
+        (setq na (vector (elt a 0)
+                             (elt a 1)
+                             (elt a 2)
+                             (elt a 3)
+                             ))
+        (message "na=%s" na)
+        (message "well item=%s" (nthcdr 1 item))
+        (setq item (cons (car item) na))
+        ;; (setcar (nthcdr 1 item) na)
+        ))
+    (message "item=%s" item)
+
     item
     ))
 
@@ -52,7 +67,7 @@
     ))
 
 (defun elpamr--full-path-with-parent (parent filename)
-  (message "parent=%s filename=%s" parent filename)
+  ;; (message "parent=%s filename=%s" parent filename)
   (file-truename (concat (file-name-as-directory parent) filename)))
 
 (defun elpamr-create-mirror ()
@@ -63,9 +78,7 @@
       (setq item (elpamr--create-one-item-for-archive-contents pkg))
       (push item rlt)
       )
-    ;; (message "rlt=%s" rlt)
-    ;; package the tar
-    ;; instead we scan all the sub-directories in ~/.emacs.d/elpa
+
     (unless (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
       (setq elpamr-default-output-directory (read-directory-name "Output directory:"))
       )
@@ -90,8 +103,11 @@
         )
 
       ;; output archive-contents
+      ;; that
       (with-temp-buffer
         (let ((print-level nil)  (print-length nil))
+          ;; well, that's required, I don't know why
+          (setq rlt (cons 1 rlt))
           (insert (format "%S" rlt)))
         (write-file (file-truename (concat (file-name-as-directory elpamr-default-output-directory) "archive-contents"))))
       )
