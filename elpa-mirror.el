@@ -33,8 +33,8 @@
                              (elt a 2)
                              (elt a 3)
                              ))
-        (message "na=%s" na)
-        (message "well item=%s" (nthcdr 1 item))
+        ;; (message "na=%s" na)
+        ;; (message "well item=%s" (nthcdr 1 item))
         (setq item (cons (car item) na))
         ;; (setcar (nthcdr 1 item) na)
         ))
@@ -71,6 +71,42 @@
   (file-truename (concat
                   (file-name-as-directory elpamr-default-output-directory)
                   file)))
+
+(defun elpamr--get-string-from-file (filePath)
+  "Return filePath's file content."
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+
+(defun elpamr--format-package-list-into-html (list)
+  (let (rlt )
+    (dolist (item list)
+      (message "item=%s %s" (symbol-name (car item)) (elt (cdr item) 2))
+      (setq rlt
+            (concat rlt
+                    (format "<tr><td>%s</td><td>%s</td></tr>\n"
+                            (symbol-name (car item))  (elt (cdr item) 2))))
+      )
+    rlt
+    ))
+
+(defun elpamr--output-html (rlt)
+  (let (str
+        (html-file (elpamr--output-fullpath "index.html"))
+        ;; @see http://stackoverflow.com/questions/145291/smart-home-in-emacs/145359#145359
+        (html-tmpl (concat
+                    (file-name-directory (if load-file-name load-file-nam (symbol-file 'elpamr--output-html)))
+                    "index.html")))
+    (setq str (elpamr--get-string-from-file html-tmpl))
+    (message "rlt=%s" rlt)
+
+    (message "html-tmpl=%s html-file=%s" html-tmpl html-file)
+    (with-temp-buffer
+      (let ((print-level nil)  (print-length nil))
+        ;; well, that's required, I don't know why
+        (insert (format str (elpamr--format-package-list-into-html rlt))))
+      (write-file html-file))
+    ))
 
 (defun elpamr-create-mirror ()
   "export and packages pkg into a new directory.create all the necessary web files for a mirror site"
@@ -109,10 +145,10 @@
       (with-temp-buffer
         (let ((print-level nil)  (print-length nil))
           ;; well, that's required, I don't know why
-          (setq rlt (cons 1 rlt))
-          (insert (format "%S" rlt)))
+          (insert (format "%S" (cons 1 rlt))))
         (write-file (elpamr--output-fullpath "archive-contents")))
-      )
+
+      (elpamr--output-html rlt))
     ))
 
 (provide 'elpa-mirror)
