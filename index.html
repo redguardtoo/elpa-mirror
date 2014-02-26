@@ -4,7 +4,17 @@
         <meta charset="utf-8" />
         <meta name="description" content="" />
         <title>My Emacs packages</title>
-        <style type="text/css"></style>
+        <style type="text/css">
+         #pkglist {
+             width:100%;
+         }
+         .name{
+             width:30%;
+         }
+         .descr{
+             width:70%;
+         }
+        </style>
     </head>
     <body>
 
@@ -16,16 +26,9 @@
             </p>
         </form>
 
-        <div id="pkgList">
-            <table>
-                <thead>
-                    <th>Package</th>
-                    <th>Description</th>
-                </thead>
-                <tbody>
-                    %s
-                </tbody>
-            </table>
+        <div id="pkgList" style="width:100%;">
+            <h2>Packages list</h2>
+            PKGLIST
         </div>
 
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min.js"></script>

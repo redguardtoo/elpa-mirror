@@ -90,7 +90,7 @@
                               (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) ".")
                               ".tar"))
        (message "tar-name=%s" tar-name)
-       (format "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" tar-name tar-name (elt (cdr item) 2))
+       (format "<div class='name'><a href='%s'>%s</a></div><div class='descr'>%s</div>\n" tar-name tar-name (elt (cdr item) 2))
        ) list "\n")
     ))
 
@@ -108,7 +108,10 @@
     (with-temp-buffer
       (let ((print-level nil)  (print-length nil))
         ;; well, that's required, I don't know why
-        (insert (format str (elpamr--format-package-list-into-html rlt))))
+        (insert (replace-regexp-in-string
+                 "PKGLIST"
+                 (elpamr--format-package-list-into-html rlt)
+                 str )))
       (write-file html-file))
     ))
 
