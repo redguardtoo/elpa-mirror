@@ -79,15 +79,19 @@
     (buffer-string)))
 
 (defun elpamr--format-package-list-into-html (list)
-  (let (rlt )
-    (dolist (item list)
-      (message "item=%s %s" (symbol-name (car item)) (elt (cdr item) 2))
-      (setq rlt
-            (concat rlt
-                    (format "<tr><td>%s</td><td>%s</td></tr>\n"
-                            (symbol-name (car item))  (elt (cdr item) 2))))
-      )
-    rlt
+  (let (tar-name)
+    (mapconcat
+     (lambda (item)
+       (message "item=%s" (elt (cdr item) 0))
+       (message "str=%s" (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) "."))
+
+       (setq tar-name (concat (symbol-name (car item))
+                              "-"
+                              (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) ".")
+                              ".tar"))
+       (message "tar-name=%s" tar-name)
+       (format "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" tar-name tar-name (elt (cdr item) 2))
+       ) list "\n")
     ))
 
 (defun elpamr--output-html (rlt)
