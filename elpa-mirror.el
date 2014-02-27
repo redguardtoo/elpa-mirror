@@ -38,15 +38,6 @@
     item
     ))
 
-(defun elpamr--pkg-installed (pkg-info)
-  (let ((name (nth 0 pkg-info))
-        (version (nth 1 pkg-info)))
-    (let ((i 0) found item)
-      (while (and (not found)
-                  (< i (length package-archive-contents)))
-        (setq i (1+ i))
-        ))
-    ))
 
 (defun elpamr--package-info (dirname)
   "return '(package-name integer-version-number) or nil"
