@@ -52,8 +52,8 @@
       <li>Add to your .emacs:<br/>
         <pre class="code spacer">(require 'package)
           (add-to-list 'package-archives
-          '("myelpa" .
-          "http://myelpa-url"))
+          '("elpamr-repository-name" .
+          "elpamr-repository-path"))
           (package-initialize)
         </pre><br/>
         In above code, you can use full path of file directory instead of URL.
@@ -68,7 +68,7 @@
       <form method="post" id="searchForm" action="">
         <p>
           <label for="filter">Filter:</label>
-          <input id="filter" type="text" />
+          <input id="filter" type="text" placeholder="Input package name here" />
           <input type="button" value="reset" id="reset"/>
         </p>
       </form>
@@ -76,7 +76,7 @@
     </div>
 
     <script type="text/javascript">
-     elpamr-package-list-json
+      var dic=[elpamr-package-list-json];
     </script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min.js"></script>
     <script type="text/javascript" src="elpa-mirror.js"></script>

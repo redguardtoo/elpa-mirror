@@ -1,4 +1,6 @@
 (setq elpamr-default-output-directory "~/myelpa")
+(setq elpamr-repository-name "myelpa")
+(setq elpamr-repository-path "http://myelpa.yourdomain.com")
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "We can use package-alist directly. This one just append my meta info into package-alist"
@@ -21,7 +23,6 @@
       (setq i (1+ i)))
 
     (unless found
-      (message "not found")
       ;; make do with installed package, looks it's deleted in archive-contents
       (setq item pkg))
 
@@ -33,13 +34,7 @@
                              (elt a 2)
                              (elt a 3)
                              ))
-        ;; (message "na=%s" na)
-        ;; (message "well item=%s" (nthcdr 1 item))
-        (setq item (cons (car item) na))
-        ;; (setcar (nthcdr 1 item) na)
-        ))
-    (message "item=%s" item)
-
+        (setq item (cons (car item) na))))
     item
     ))
 
@@ -60,9 +55,7 @@
     (when (string-match "\\(.*\\)-\\([0-9.]+\\)$" dirname)
       (setq name (match-string 1 dirname))
       (setq version (split-string (match-string 2 dirname) "\\."))
-      (setq rlt (list name version))
-      ;; (message "rlt=%s" rlt)
-      )
+      (setq rlt (list name version)))
     rlt
     ))
 
@@ -81,17 +74,31 @@
 (defun elpamr--clean-package-description (descr)
   (replace-regexp-in-string "-\*-.*-\*-" "" descr t))
 
-(defun elpamr--format-package-list-into-html (list)
-  (let (tar-name)
+(defun elpamr--create-complete-package-name (item)
+  (concat (symbol-name (car item))
+          "-"
+          (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) ".")))
+
+(defun elpamr--format-package-list-into-json (list)
+  (let (pkg-name)
     (mapconcat
      (lambda (item)
-       (setq tar-name (concat (symbol-name (car item))
-                              "-"
-                              (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) ".")
-                              ".tar"))
-       (format "<div class='name'><a href='%s'>%s</a></div><div class='descr'>%s</div>\n"
+       (setq pkg-name (elpamr--create-complete-package-name item))
+       (format "'%s'" pkg-name)
+       ) list ",\n")
+    ))
+
+(defun elpamr--format-package-list-into-html (list)
+  (let (tar-name (cnt 0))
+    (mapconcat
+     (lambda (item)
+       (setq cnt (1+ cnt))
+       (setq tar-name (concat (elpamr--create-complete-package-name item) ".tar"))
+       (format "<div id='n%d' class='name'><a href='%s'>%s</a></div><div id='d%d' class='descr'>%s</div>\n"
+               cnt
                tar-name
                tar-name
+               cnt
                (elpamr--clean-package-description (elt (cdr item) 2)))
        ) list "\n")
     ))
@@ -109,19 +116,33 @@
 
     ;; index.html
     (with-temp-buffer
-      (let ((print-level nil)  (print-length nil))
-        ;; well, that's required, I don't know why
-        (insert (replace-regexp-in-string
+      (let ((print-level nil)  (print-length nil) str)
+        (setq str (replace-regexp-in-string
                  "elpamr-package-list-html"
                  (elpamr--format-package-list-into-html rlt)
                  (elpamr--get-string-from-file html-tmpl)
-                 t)))
+                 t))
+        (setq str (replace-regexp-in-string
+                   "elpamr-package-list-json"
+                   (elpamr--format-package-list-into-json rlt)
+                   str
+                   t))
+        (setq str (replace-regexp-in-string
+                   "elpamr-repository-name"
+                   elpamr-repository-name
+                   str
+                   t))
+        (setq str (replace-regexp-in-string
+                   "elpamr-repository-path"
+                   elpamr-repository-path
+                   str
+                   t))
+        (insert str))
       (write-file html-file))
 
     ;; js file
     (with-temp-buffer
       (let ((print-level nil)  (print-length nil))
-        ;; well, that's required, I don't know why
         (insert (elpamr--get-string-from-file js-tmpl)))
       (write-file js-file))
     ))
@@ -147,27 +168,15 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
       (dolist (dir dirs)
         (unless (or (member dir '("archives" "." ".."))
                     (not (setq pkg-info (elpamr--package-info dir))))
-          ;; package tar
-          ;; (message "dir=%s" dir)
-          ;; (message "elpamr-default-output-directory=%s" elpamr-default-output-directory)
+          ;; create tar
           (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--output-fullpath dir) ".tar --exclude=*.elc --exclude=*~ " dir))
-          ;; (message "tar-cmd=%s" tar-cmd)
-          (shell-command tar-cmd))
-
-        ;; extract dir with name and version, version should be converted into a number
-        ;; compare with the version in the list (that version should also be a number
-        ;; if both package name and version match, than package it, else just ignore
-        ;; because we don't want to deal with orphan packages
-        )
+          (shell-command tar-cmd)))
 
       ;; output archive-contents
-      ;; that
       (with-temp-buffer
         (let ((print-level nil)  (print-length nil))
-          ;; well, that's required, I don't know why
           (insert (format "%S" (cons 1 rlt))))
         (write-file (elpamr--output-fullpath "archive-contents")))
-
       (elpamr--output-html rlt))
     ))
 
