@@ -86,7 +86,6 @@
                               "-"
                               (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) ".")
                               ".tar"))
-       (message "tar-name=%s" tar-name)
        (format "<div class='name'><a href='%s'>%s</a></div><div class='descr'>%s</div>\n" tar-name tar-name (elt (cdr item) 2))
        ) list "\n")
     ))
