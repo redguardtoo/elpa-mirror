@@ -1,81 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="description" content="" />
-        <title>My Emacs packages</title>
-        <style type="text/css">
-         #pkglist {
-           width:100%;
-         }
-         .name{
-           float:left;
-           width:30%;
-         }
-         .descr{
-           float:right;
-           width:70%;
-         }
-         .code{
-          background-color: #F8F8F8;
-          border: 1px solid #DDDDDD;
-          border-radius: 3px;
-          display: inline-block;
-          margin: 0;
-          max-width: 100%;
-          overflow: auto;
-          padding: 0;
-          vertical-align: middle;
-         }
-         .spacer {
-           margin:10px 0;
-         }
-         @media(max-width: 480px) {
-           .name, .descr{
-             width:100%;
-           }
-           .name{
-             padding-top:5px;
-           }
-           .descr{
-             border-bottom:1px solid;
-             padding-bottom:5px;
-           }
-         }
-        </style>
-    </head>
-    <body>
-      <h2>Quick Start</h2>
-      <ul id="usage">
-        <li><a href="http://repo.or.cz/w/emacs.git/blob_plain/1a0a666f941c99882093d7bd08ced15033bc3f0c:/lisp/emacs-lisp/package.el">First, if you are not using Emacs 24, install package.el</a>.
-        </li>
-        <li>Add to your .emacs:<br/>
-          <pre class="code spacer">(require 'package)
-            (add-to-list 'package-archives
-            '("myelpa" .
-              "http://myelpa-url"))
-            (package-initialize)
-          </pre><br/>
-          In above code, you can use full path of file directory instead of URL.
-        </li>
-        <li><span class="code">M-x eval-buffer</span> to evaluate it, and then do <span class="code">M-x package-refresh-contents</span> to load in the package listing.</li>
-        <li>You're good to go!</li>
-        <li><strong>OPTIONAL</strong>, please see <a href="http://www.emacswiki.org/emacs/ELPA">EmacsWiki</a> for advanced stuff.</li>
-        <li><strong>OPTIONAL</strong>, to upgrade specific package, please download tar file and run <span class="code">M-x package-install-file</span>.</li>
-      </ul>
-      <h2>List of Packages</h2>
-      <div id="pkgList" style="width:100%;">
-        <form method="post" id="searchForm" action="">
-          <p>
-            <label for="filter">Filter:</label>
-            <input id="filter" type="text" />
-            <input type="button" value="reset" id="reset"/>
-          </p>
-        </form>
-        elpamr-package-list-html
-      </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="" />
+    <title>My Emacs packages</title>
+    <style type="text/css">
+     #pkglist {
+       width:100%;
+     }
+     .name{
+       float:left;
+       width:30%;
+     }
+     .descr{
+       float:right;
+       width:70%;
+     }
+     .code{
+       background-color: #F8F8F8;
+       border: 1px solid #DDDDDD;
+       border-radius: 3px;
+       display: inline-block;
+       margin: 0;
+       max-width: 100%;
+       overflow: auto;
+       padding: 0;
+       vertical-align: middle;
+     }
+     .spacer {
+       margin:10px 0;
+     }
+     @media(max-width: 480px) {
+       .name, .descr{
+         width:100%;
+       }
+       .name{
+         padding-top:5px;
+       }
+       .descr{
+         border-bottom:1px solid;
+         padding-bottom:5px;
+       }
+     }
+    </style>
+  </head>
+  <body>
+    <h2>Quick Start</h2>
+    <ul id="usage">
+      <li><a href="http://repo.or.cz/w/emacs.git/blob_plain/1a0a666f941c99882093d7bd08ced15033bc3f0c:/lisp/emacs-lisp/package.el">First, if you are not using Emacs 24, install package.el</a>.
+      </li>
+      <li>Add to your .emacs:<br/>
+        <pre class="code spacer">(require 'package)
+          (add-to-list 'package-archives
+          '("myelpa" .
+          "http://myelpa-url"))
+          (package-initialize)
+        </pre><br/>
+        In above code, you can use full path of file directory instead of URL.
+      </li>
+      <li><span class="code">M-x eval-buffer</span> to evaluate it, and then do <span class="code">M-x package-refresh-contents</span> to load in the package listing.</li>
+      <li>You're good to go!</li>
+      <li><strong>OPTIONAL</strong>, please see <a href="http://www.emacswiki.org/emacs/ELPA">EmacsWiki</a> for advanced stuff.</li>
+      <li><strong>OPTIONAL</strong>, to upgrade specific package, please download tar file and run <span class="code">M-x package-install-file</span>.</li>
+    </ul>
+    <h2>List of Packages</h2>
+    <div id="pkgList" style="width:100%;">
+      <form method="post" id="searchForm" action="">
+        <p>
+          <label for="filter">Filter:</label>
+          <input id="filter" type="text" />
+          <input type="button" value="reset" id="reset"/>
+        </p>
+      </form>
+      elpamr-package-list-html
+    </div>
 
-      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min.js"></script>
-      <script type="text/javascript" src="elpa-mirror.js"></script>
-    </body>
+    <script type="text/javascript">
+     elpamr-package-list-json
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min.js"></script>
+    <script type="text/javascript" src="elpa-mirror.js"></script>
+  </body>
 </html>

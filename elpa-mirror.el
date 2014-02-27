@@ -78,6 +78,9 @@
     (insert-file-contents filePath)
     (buffer-string)))
 
+(defun elpamr--clean-package-description (descr)
+  (replace-regexp-in-string "-\*-.*-\*-" "" descr t))
+
 (defun elpamr--format-package-list-into-html (list)
   (let (tar-name)
     (mapconcat
@@ -86,7 +89,10 @@
                               "-"
                               (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) ".")
                               ".tar"))
-       (format "<div class='name'><a href='%s'>%s</a></div><div class='descr'>%s</div>\n" tar-name tar-name (elt (cdr item) 2))
+       (format "<div class='name'><a href='%s'>%s</a></div><div class='descr'>%s</div>\n"
+               tar-name
+               tar-name
+               (elpamr--clean-package-description (elt (cdr item) 2)))
        ) list "\n")
     ))
 
@@ -120,6 +126,7 @@
       (write-file js-file))
     ))
 
+;;;###autoload
 (defun elpamr-create-mirror-for-installed ()
   "Export INSTALLED packages into a new directory. Create html files for the mirror site.
 If elpamr-default-output-directory is not nil, it's assumed that is output directory. Or else, user will be asked to provide the output directory."
