@@ -95,24 +95,32 @@
     ))
 
 (defun elpamr--output-html (rlt)
-  (let (str
+  (let ((js-file (elpamr--output-fullpath "elpa-mirror.js"))
+        (js-tmpl (concat
+                  (file-name-directory (if load-file-name load-file-nam (symbol-file 'elpamr--output-html)))
+                  "elpa-mirror.js"))
         (html-file (elpamr--output-fullpath "index.html"))
         ;; @see http://stackoverflow.com/questions/145291/smart-home-in-emacs/145359#145359
         (html-tmpl (concat
                     (file-name-directory (if load-file-name load-file-nam (symbol-file 'elpamr--output-html)))
                     "index.html")))
-    (setq str (elpamr--get-string-from-file html-tmpl))
-    (message "rlt=%s" rlt)
 
-    (message "html-tmpl=%s html-file=%s" html-tmpl html-file)
+    ;; index.html
     (with-temp-buffer
       (let ((print-level nil)  (print-length nil))
         ;; well, that's required, I don't know why
         (insert (replace-regexp-in-string
                  "PKGLIST"
                  (elpamr--format-package-list-into-html rlt)
-                 str )))
+                 (elpamr--get-string-from-file html-tmpl))))
       (write-file html-file))
+
+    ;; js file
+    (with-temp-buffer
+      (let ((print-level nil)  (print-length nil))
+        ;; well, that's required, I don't know why
+        (insert (elpamr--get-string-from-file js-tmpl)))
+      (write-file js-file))
     ))
 
 (defun elpamr-create-mirror ()
