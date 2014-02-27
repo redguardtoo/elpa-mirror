@@ -82,9 +82,6 @@
   (let (tar-name)
     (mapconcat
      (lambda (item)
-       (message "item=%s" (elt (cdr item) 0))
-       (message "str=%s" (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) "."))
-
        (setq tar-name (concat (symbol-name (car item))
                               "-"
                               (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) ".")
@@ -110,9 +107,10 @@
       (let ((print-level nil)  (print-length nil))
         ;; well, that's required, I don't know why
         (insert (replace-regexp-in-string
-                 "PKGLIST"
+                 "HTMLPKGLIST"
                  (elpamr--format-package-list-into-html rlt)
-                 (elpamr--get-string-from-file html-tmpl))))
+                 (elpamr--get-string-from-file html-tmpl)
+                 t)))
       (write-file html-file))
 
     ;; js file

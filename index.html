@@ -6,13 +6,27 @@
         <title>My Emacs packages</title>
         <style type="text/css">
          #pkglist {
-             width:100%;
+           width:100%;
          }
          .name{
-             width:30%;
+           float:left;
+           width:30%;
          }
          .descr{
-             width:70%;
+           float:right;
+           width:70%;
+         }
+         @media(max-width: 480px) {
+           .name, .descr{
+             width:100%;
+           }
+           .name{
+             padding-top:5px;
+           }
+           .descr{
+             border-bottom:1px solid;
+             padding-bottom:5px;
+           }
          }
         </style>
     </head>
@@ -27,8 +41,8 @@
         </form>
 
         <div id="pkgList" style="width:100%;">
-            <h2>Packages list</h2>
-            PKGLIST
+            <h2>List of Packages</h2>
+            HTMLPKGLIST
         </div>
 
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min.js"></script>
