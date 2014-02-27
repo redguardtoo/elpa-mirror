@@ -60,7 +60,8 @@
         </li>
         <li><span class="code">M-x eval-buffer</span> to evaluate it, and then do <span class="code">M-x package-refresh-contents</span> to load in the package listing.</li>
         <li>You're good to go!</li>
-        <li><strong>OPTIONAL</strong>, see <a href="http://www.emacswiki.org/emacs/ELPA">EmacsWiki</a> for advanced stuff.</li>
+        <li><strong>OPTIONAL</strong>, please see <a href="http://www.emacswiki.org/emacs/ELPA">EmacsWiki</a> for advanced stuff.</li>
+        <li><strong>OPTIONAL</strong>, to upgrade specific package, please download tar file and run <span class="code">M-x package-install-file</span>.</li>
       </ul>
       <h2>List of Packages</h2>
       <div id="pkgList" style="width:100%;">
@@ -68,10 +69,10 @@
           <p>
             <label for="filter">Filter:</label>
             <input id="filter" type="text" />
-            <input type="button" value="reset" />
+            <input type="button" value="reset" id="reset"/>
           </p>
         </form>
-        HTMLPKGLIST
+        elpamr-package-list-html
       </div>
 
       <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min.js"></script>

@@ -106,7 +106,7 @@
       (let ((print-level nil)  (print-length nil))
         ;; well, that's required, I don't know why
         (insert (replace-regexp-in-string
-                 "HTMLPKGLIST"
+                 "elpamr-package-list-html"
                  (elpamr--format-package-list-into-html rlt)
                  (elpamr--get-string-from-file html-tmpl)
                  t)))
@@ -120,8 +120,9 @@
       (write-file js-file))
     ))
 
-(defun elpamr-create-mirror ()
-  "export and packages pkg into a new directory.create all the necessary web files for a mirror site"
+(defun elpamr-create-mirror-for-installed ()
+  "Export INSTALLED packages into a new directory. Create html files for the mirror site.
+If elpamr-default-output-directory is not nil, it's assumed that is output directory. Or else, user will be asked to provide the output directory."
   (interactive)
   (let (item rlt pkg-dirname pkg-info tar-cmd len dirs)
     (dolist (pkg package-alist)
