@@ -1,6 +1,18 @@
-(setq elpamr-default-output-directory "~/myelpa")
-(setq elpamr-repository-name "myelpa")
-(setq elpamr-repository-path "http://myelpa.yourdomain.com")
+(defvar elpamr-default-output-directory
+  nil
+  "The output directory. If nil, user will be required provide one when running `elpamr-create-mirror-for-installed`")
+
+(defvar elpamr-repository-name
+  "myelpa"
+  "repository name. It will be displayed in index.html.")
+
+(defvar elpamr-repository-path
+  "http://myelpa.mydomain.com"
+  "Repository path. It could be a local directory. The file `archive-contents` will be fetched from it.")
+
+(defvar elpamr-email
+  nil
+  "Email. If nil, the user-mail-address will be used.")
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "We can use package-alist directly. This one just append my meta info into package-alist"
@@ -94,6 +106,11 @@
        ) list "\n")
     ))
 
+(defun elpamr--format-email ()
+  (let ((email (if elpamr-email elpamr-email (if user-mail-address user-mail-address ""))))
+    (format "<a href='mailto:%s'>%s</a>" email email)
+    ))
+
 (defun elpamr--output-html (rlt)
   (let ((js-file (elpamr--output-fullpath "elpa-mirror.js"))
         (js-tmpl (concat
@@ -116,6 +133,11 @@
         (setq str (replace-regexp-in-string
                    "elpamr-package-list-json"
                    (elpamr--format-package-list-into-json rlt)
+                   str
+                   t))
+        (setq str (replace-regexp-in-string
+                   "elpamr-email"
+                   (elpamr--format-email)
                    str
                    t))
         (setq str (replace-regexp-in-string
