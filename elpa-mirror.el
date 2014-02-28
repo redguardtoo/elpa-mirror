@@ -252,6 +252,7 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
             (setq tar-cmd (concat "cd " package-user-dir
                                   "; cp "
                                   (file-name-as-directory dir) (car pkg-info) ".el"
+                                  " "
                                   (elpamr--output-fullpath dir)
                                   ".el ")))
            ;; create tar using GNU tar or BSD tar
