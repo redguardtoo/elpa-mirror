@@ -40,15 +40,15 @@
 
 (defvar elpamr-repository-name
   "myelpa"
-  "repository name. It will be displayed in index.html.")
+  "repository name to be displayed in index.html.")
 
 (defvar elpamr-repository-path
   "http://myelpa.mydomain.com"
-  "Repository path. It could be a local directory. The file `archive-contents` will be fetched from it.")
+  "Repository path to be displayed in index.html")
 
 (defvar elpamr-email
   "name@mydomain.com"
-  "Email.")
+  "Email to be displayed in index.html")
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "We can use package-alist directly. This one just append my meta info into package-alist"
