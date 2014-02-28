@@ -4,7 +4,7 @@
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
-;; Version: 1.0.0
+;; Version: 1.1.0
 ;; Keywords: cloud mirror elpa
 ;;
 ;; This file is not part of GNU Emacs.
@@ -50,11 +50,16 @@
   "name@mydomain.com"
   "Email to be displayed in index.html")
 
+(defvar elpamr-exclude-package-from-repositories
+  '("myelpa")
+  "From certain repositories, we include NO package")
+
 (defun elpamr--create-one-item-for-archive-contents (pkg)
-  "We can use package-alist directly. This one just append my meta info into package-alist"
+  "We can use package-alist directly. This API will append some meta info into package-alist."
   (let ((name (car pkg))
         item
         package-content
+        repo
         found
         (i 0))
 
@@ -74,26 +79,34 @@
       ;; make do with installed package, looks it's deleted in archive-contents
       (setq item pkg))
 
-    (let ((a (cdr item)) na)
-      (cond
-       (found
-        (when (>= (length a) 4)
-          ;; only need first four
-          (setq na (vector (elt a 0)
-                           (elt a 1)
-                           (elt a 2)
-                           (elt a 3)))
-          (setq item (cons (car item) na))))
-       (t
-        ;; we assume it's tar format
-        (when (>= (length a) 3)
-          ;; only need first three
-          (setq na (vector (elt a 0)
-                           (elt a 1)
-                           (elt a 2)
-                           'tar))
-          (setq item (cons (car item) na))))
-       ))
+    (setq repo (elt (cdr package-content) 4))
+    (if (listp repo)  (setq repo (elt (cdr package-content) 5)))
+    ;; (message "repo=%s" repo)
+    (cond
+     ((member repo elpamr-exclude-package-from-repositories)
+      (setq item nil))
+     (t
+      (let ((a (cdr item)) na)
+        (cond
+         (found
+          (when (>= (length a) 4)
+            ;; only need first four
+            (setq na (vector (elt a 0)
+                             (elt a 1)
+                             (elt a 2)
+                             (elt a 3)))
+            (setq item (cons (car item) na))))
+         (t
+          ;; we assume it's tar format
+          (when (>= (length a) 3)
+            ;; only need first three
+            (setq na (vector (elt a 0)
+                             (elt a 1)
+                             (elt a 2)
+                             'tar))
+            (setq item (cons (car item) na))))
+         ))
+      ))
     item
     ))
 
@@ -229,14 +242,16 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
   (let (item rlt pkg-dirname pkg-info tar-cmd len dirs cnt)
     (dolist (pkg package-alist)
       (setq item (elpamr--create-one-item-for-archive-contents pkg))
-      (push item rlt)
+      (if item (push item rlt))
       )
 
     (unless (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
       (setq elpamr-default-output-directory (read-directory-name "Output directory:"))
       )
 
-    (when (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
+    (when (and (> (length rlt) 0)
+               elpamr-default-output-directory
+               (file-directory-p elpamr-default-output-directory))
       (setq dirs (directory-files package-user-dir))
       (setq cnt 0)
       (setq len (length dirs))

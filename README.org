@@ -1,4 +1,4 @@
-* elpa-mirror (version 1.0.0)
+* elpa-mirror (version 1.1.0)
 Set up ELPA mirror from locally installed packages is easy.
 
 It will create everything you need (web files, pakcages, archive-contents) for hosting a ELPA mirror site. Only locally installed packages will be included.
@@ -44,12 +44,20 @@ You can tweak the content of index.html a little bit.
 #+BEGIN_SRC elisp
 ;; default output directory
 (setq elpamr-default-output-directory "~/myelpa")
+
 ;; displayed in sample code of index.html
 (setq elpamr-repository-name "myelpa")
+
 ;; displayed in sample code of index.html
 (setq elpamr-repository-path "http://myelpa.mydomain.com")
+
 ;; contact email, displayed in index.html
-(seq elpamr-email "myname@gmail.com")
+(setq elpamr-email "myname@gmail.com")
+
+;; when exporting installed packages, ignore packages from these repositories
+;; "gnu" means packages hosted on http://elpa.gnu.org
+;; "melpa" means packages hosted on http://melpa.milkbox.net
+(setq elpamr-exclude-package-from-repositories '("myelpa" "gnu" "melpa"))
 #+END_SRC
 
 * Contact me
