@@ -47,8 +47,8 @@
   "Repository path. It could be a local directory. The file `archive-contents` will be fetched from it.")
 
 (defvar elpamr-email
-  nil
-  "Email. If nil, the user-mail-address will be used.")
+  "name@mydomain.com"
+  "Email.")
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "We can use package-alist directly. This one just append my meta info into package-alist"
@@ -161,9 +161,7 @@
     ))
 
 (defun elpamr--format-email ()
-  (let ((email (if elpamr-email elpamr-email (if user-mail-address user-mail-address ""))))
-    (format "<a href='mailto:%s'>%s</a>" email email)
-    ))
+  (format "<a href='mailto:%s'>%s</a>" elpamr-email elpamr-email))
 
 (defun elpamr--output-html (rlt)
   (let ((js-file (elpamr--output-fullpath "elpa-mirror.js"))
