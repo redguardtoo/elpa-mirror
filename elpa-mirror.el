@@ -179,6 +179,15 @@
       (write-file js-file))
     ))
 
+(defun elpamr--is-single-el-by-name (name pkglist)
+  (interactive)
+  (let (rlt)
+    (dolist (pkg pkglist)
+      (if (string= (car pkg) name)
+          (setq rlt (elpamr--is-single-el pkg))
+        ))
+    rlt))
+
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed ()
   "Export INSTALLED packages into a new directory. Create html files for the mirror site.
@@ -200,8 +209,20 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
       (dolist (dir dirs)
         (unless (or (member dir '("archives" "." ".."))
                     (not (setq pkg-info (elpamr--package-info dir))))
-          ;; create tar
-          (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--output-fullpath dir) ".tar --exclude=*.elc --exclude=*~ " dir))
+
+          (cond
+           ;; copy single el
+           ((elpamr--is-single-el-by-name (car pkg-info) rlt)
+            (setq tar-cmd (concat "cd " package-user-dir
+                                  "; cp "
+                                  (file-name-as-directory dir) (car pkg-info) ".el"
+                                  (elpamr--output-fullpath dir)
+                                  ".el ")))
+           ;; create tar
+           (t
+            (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--output-fullpath dir) ".tar --exclude=*.elc --exclude=*~ " dir))
+            ))
+          (message "tar-cmd=%s" tar-cmd)
           (shell-command tar-cmd)))
 
       ;; output archive-contents
