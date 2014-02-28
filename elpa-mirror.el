@@ -91,12 +91,20 @@
        ) list ",\n")
     ))
 
+(defun elpamr--is-single-el (item)
+  (let ((a (cdr item)))
+    (and (> (length a) 3) (string= "single" (elt a 3)))
+    ))
+
 (defun elpamr--format-package-list-into-html (list)
   (let (tar-name (cnt 0))
     (mapconcat
      (lambda (item)
        (setq cnt (1+ cnt))
-       (setq tar-name (concat (elpamr--create-complete-package-name item) ".tar"))
+       (message "item=%s" item)
+       (setq tar-name (concat (elpamr--create-complete-package-name item)
+                              (if (elpamr--is-single-el item) ".el" ".tar")
+                              ))
        (format "<div id='n%d' class='name'><a href='%s'>%s</a></div><div id='d%d' class='descr'>%s</div>\n"
                cnt
                tar-name
