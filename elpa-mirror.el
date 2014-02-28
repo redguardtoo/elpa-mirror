@@ -112,7 +112,6 @@
     (mapconcat
      (lambda (item)
        (setq cnt (1+ cnt))
-       (message "item=%s" item)
        (setq tar-name (concat (elpamr--create-complete-package-name item)
                               (if (elpamr--is-single-el item) ".el" ".tar")
                               ))
@@ -193,7 +192,7 @@
   "Export INSTALLED packages into a new directory. Create html files for the mirror site.
 If elpamr-default-output-directory is not nil, it's assumed that is output directory. Or else, user will be asked to provide the output directory."
   (interactive)
-  (let (item rlt pkg-dirname pkg-info tar-cmd len dirs)
+  (let (item rlt pkg-dirname pkg-info tar-cmd len dirs cnt)
     (dolist (pkg package-alist)
       (setq item (elpamr--create-one-item-for-archive-contents pkg))
       (push item rlt)
@@ -205,6 +204,7 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
 
     (when (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
       (setq dirs (directory-files package-user-dir))
+      (setq cnt 0)
       (setq len (length dirs))
       (dolist (dir dirs)
         (unless (or (member dir '("archives" "." ".."))
@@ -222,15 +222,18 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
            (t
             (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--output-fullpath dir) ".tar --exclude=*.elc --exclude=*~ " dir))
             ))
-          (message "tar-cmd=%s" tar-cmd)
-          (shell-command tar-cmd)))
+          (shell-command tar-cmd)
+          (setq cnt (1+ cnt))
+          (message "Creating *.tar and *.el ... %d%%" (/ (* cnt 100) len))
+          ))
 
       ;; output archive-contents
       (with-temp-buffer
         (let ((print-level nil)  (print-length nil))
           (insert (format "%S" (cons 1 rlt))))
         (write-file (elpamr--output-fullpath "archive-contents")))
-      (elpamr--output-html rlt))
+      (elpamr--output-html rlt)
+      (message "DONE! Output into %s" elpamr-default-output-directory))
     ))
 
 (provide 'elpa-mirror)
