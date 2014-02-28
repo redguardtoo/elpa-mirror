@@ -39,14 +39,25 @@
       (setq item pkg))
 
     (let ((a (cdr item)) na)
-      (when (= 5 (length a))
-        ;; only need first four
-        (setq na (vector (elt a 0)
-                             (elt a 1)
-                             (elt a 2)
-                             (elt a 3)
-                             ))
-        (setq item (cons (car item) na))))
+      (cond
+       (found
+        (when (>= (length a) 4)
+          ;; only need first four
+          (setq na (vector (elt a 0)
+                           (elt a 1)
+                           (elt a 2)
+                           (elt a 3)))
+          (setq item (cons (car item) na))))
+       (t
+        ;; we assume it's tar format
+        (when (>= (length a) 3)
+          ;; only need first three
+          (setq na (vector (elt a 0)
+                           (elt a 1)
+                           (elt a 2)
+                           'tar))
+          (setq item (cons (car item) na))))
+       ))
     item
     ))
 
