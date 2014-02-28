@@ -1,3 +1,39 @@
+;;; elpa-mirror.el --- ELPA mirror from locally installed packages is easy
+
+;; Copyright (C) 2014 Chen Bin
+
+;; Author: Chen Bin <chenbin.sh@gmail.com>
+;; URL: http://github.com/redguardtoo/elpa-mirror
+;; Version: 1.0.0
+;; Keywords: cloud mirror elpa
+;;
+;; This file is not part of GNU Emacs.
+
+;;; License:
+
+;; This file is part of elpa-mirror
+;;
+;; elpa-mirror is free software: you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as published
+;; by the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;;
+;; elpa-mirror is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+;;
+;;  `M-x elpamr-create-mirror-for-installed` is the only command you need run.
+;;
+
+;;; Code:
+(require 'package)
+
 (defvar elpamr-default-output-directory
   nil
   "The output directory. If nil, user will be required provide one when running `elpamr-create-mirror-for-installed`")
@@ -218,9 +254,9 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
                                   (file-name-as-directory dir) (car pkg-info) ".el"
                                   (elpamr--output-fullpath dir)
                                   ".el ")))
-           ;; create tar
+           ;; create tar using GNU tar or BSD tar
            (t
-            (setq tar-cmd (concat "cd " package-user-dir "; tar cf " (elpamr--output-fullpath dir) ".tar --exclude=*.elc --exclude=*~ " dir))
+            (setq tar-cmd (concat "cd " package-user-dir "; COPYFILE_DISABLE=\"\" tar cf " (elpamr--output-fullpath dir) ".tar --exclude=*.elc --exclude=*~ " dir))
             ))
           (shell-command tar-cmd)
           (setq cnt (1+ cnt))
