@@ -1,45 +1,56 @@
-* general
-* format
-#+BEGIN_SRC elisp
-(ada-mode ;; package name
- . ;; annotation that this is pair data structure
- [ ;; vector of meta data
-  (5 0 1) ;;curent version
-  ((wisi (1 0))) ;; dependency
-  "major-mode for editing Ada sources" ;; description
-  tar ;; format tar or el
-  ( ;;extra meta data
-   (:keywords quote nil) ;; keywords
-   (:url . "http://stephe-leake.org/emacs/ada-mode/emacs-ada-mode.html") ;; url
-   )
-  ])
-#+END_SRC
-* plan [6/9]
-- [X] read and eval the archive-contents in ~/.emacs.d/elpa (check variable package-archive-contents)
-- [X] installed package (it's defined in package-alist)
-#+BEGIN_SRC elisp
-(zenburn-theme . [(2 1) nil "A low contrast color theme for Emacs."])
-#+END_SRC
-- [X] package the files and put it in an output dir (just use tar), how to detect the directory? ::
-See function package-load-all-descriptors , check the variable package-user-dir.
-- [X] generate html/javascript file for search, that's easy
-- [X] just use tar command in emacs, looks tar-mode in emacs is very basic, so we use system tar instead, please note you need exclude elc file (read package-unpack)
-- [ ] write the archive-contents
-#+BEGIN_SRC elisp
-(defun wg-write-sexp-to-file (sexp file)
-  "Write the printable representation of SEXP to FILE."
-  (with-temp-buffer
-    (let ((print-level nil)  (print-length nil))
-      (insert (format "%S" sexp)))
-    (write-file file)))
+* elpa-mirror (version 1.0.0)
+Set up ELPA mirror from locally installed packages is easy.
+
+It will create everything you need (web files, pakcages, archive-contents) for hosting a ELPA mirror site. Only locally installed packages will be included.
+
+So you basically lock up your packages.
+
+* Why use elpa-mirror
+- Packages are locked. You control all your packages. No package dependency hell!
+- Hosting your own ELPA site has *ZERO* cost. You only need an email and some free cloud service like Dropbox.
+- Web files are optimized manually. So the web traffic is minimum.
+- The web site supports both mobile and desktop.
+
+* Install
+elpa-mirror is already uploaded to [[http://marmalade-repo.org/]]. The best way to install it is using Emacs' package manager.
+
+Or you can download the package from [[https://dl.dropboxusercontent.com/u/858862/myelpa/index.html]] and manually install it by "M-x package-install-file".
+* Set up
+Nothing to set up.
+
+* Usage
+Just "M-x elpamr-create-mirror-for-installed". That's the only command!
+
+All files needed to host ELPA site will be output into user specified directory. Say it's "~/myelpa".
+
+* Download packages from your own ELPA
+You can use local file path, insert below code into your .emacs:
+#+BEGIN_SRC sh
+# Now elpa/marmalade/melpa site will be overrided
+(setq package-archives '(("myelpa" . "~/myelpa")))
 #+END_SRC
 
-- [X] how package get the archive-contents, for local path, it only support abosolute path
-could be local file content, read package--with-work-buffer. all it matters is http
-- [ ] what's the queue system? use email, some email template.
-- [ ] a Queue system based on email, see [[http://stackoverflow.com/questions/18361233/gmail-sending-limits]] for details, let the developer handle it by himself.
-* do it
-check "(file-name-directory load-file-name)" for script path
-* how to test
-export packages into some directory,
-add absolute path in a new .emacs
+All you can upload everything into any web server or cloud service, insert below code into .emacs:
+#+BEGIN_SRC sh
+# all-to-list will not override default elpa, so now you have to repositories, one is elpa, another is myelpa
+(add-to-list 'package-archives '("myelpa" . "https://dl.dropboxusercontent.com/u/858862/myelpa/"))
+#+END_SRC
+
+My home page is at [[https://dl.dropboxusercontent.com/u/858862/myelpa/index.html]].
+
+* Tips (OPTIONAL)
+You can tweak the content of index.html a little bit.
+
+#+BEGIN_SRC elisp
+;; default output directory
+(setq elpamr-default-output-directory "~/myelpa")
+;; displayed in sample code of index.html
+(setq elpamr-repository-name "myelpa")
+;; displayed in sample code of index.html
+(setq elpamr-repository-path "http://myelpa.mydomain.com")
+;; contact email, displayed in index.html
+(seq elpamr-email "myname@gmail.com")
+#+END_SRC
+
+* Contact me
+You can report bugs at [[https://github.com/redguardtoo/elpa-mirror]].
