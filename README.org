@@ -1,4 +1,4 @@
-* elpa-mirror (version 1.1.0)
+* elpa-mirror (version 1.1.1)
 Set up ELPA mirror from locally installed packages is easy.
 
 It will create everything you need (web files, pakcages, archive-contents) for hosting a ELPA mirror site. Only locally installed packages will be included.

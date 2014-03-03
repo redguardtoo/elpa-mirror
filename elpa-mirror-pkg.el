@@ -1,2 +1,2 @@
-(define-package "elpa-mirror" "1.1.0"
+(define-package "elpa-mirror" "1.1.1"
                 "ELPA mirror from locally installed packages is easy")

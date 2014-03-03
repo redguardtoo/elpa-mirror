@@ -4,7 +4,7 @@
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
-;; Version: 1.1.0
+;; Version: 1.1.1
 ;; Keywords: cloud mirror elpa
 ;;
 ;; This file is not part of GNU Emacs.
@@ -179,12 +179,12 @@
 (defun elpamr--output-html (rlt)
   (let ((js-file (elpamr--output-fullpath "elpa-mirror.js"))
         (js-tmpl (concat
-                  (file-name-directory (if load-file-name load-file-nam (symbol-file 'elpamr--output-html)))
+                  (file-name-directory (if load-file-name load-file-name (symbol-file 'elpamr--output-html)))
                   "elpa-mirror.js"))
         (html-file (elpamr--output-fullpath "index.html"))
         ;; @see http://stackoverflow.com/questions/145291/smart-home-in-emacs/145359#145359
         (html-tmpl (concat
-                    (file-name-directory (if load-file-name load-file-nam (symbol-file 'elpamr--output-html)))
+                    (file-name-directory (if load-file-name load-file-name (symbol-file 'elpamr--output-html)))
                     "index.html")))
 
     ;; index.html
