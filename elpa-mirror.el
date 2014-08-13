@@ -270,7 +270,7 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
                                   ".el ")))
            ;; create tar using GNU tar or BSD tar
            (t
-            (setq tar-cmd (concat "cd " package-user-dir "; COPYFILE_DISABLE=\"\" tar cf " (elpamr--output-fullpath dir) ".tar --exclude=*.elc --exclude=*~ " dir))
+            (setq tar-cmd (concat "cd " package-user-dir "; COPYFILE_DISABLE=\"\" tar cf " (elpamr--output-fullpath dir) ".tar --exclude=\"*.elc\" --exclude=\"*~\" " dir))
             ))
           (shell-command tar-cmd)
           (setq cnt (1+ cnt))
