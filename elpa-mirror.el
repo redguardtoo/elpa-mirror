@@ -4,7 +4,7 @@
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
-;; Version: 1.1.2
+;; Version: 1.1.3
 ;; Keywords: cloud mirror elpa
 ;;
 ;; This file is not part of GNU Emacs.
