@@ -4,7 +4,7 @@
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
-;; Version: 1.1.3
+;; Version: 1.1.4
 ;; Keywords: cloud mirror elpa
 ;;
 ;; This file is not part of GNU Emacs.
@@ -52,7 +52,12 @@
 
 (defvar elpamr-exclude-package-from-repositories
   '("myelpa")
-  "From certain repositories, we include NO package")
+  "exclude packages from certain repositories")
+
+(defun elpamr--get-info-array (item)
+  (if (elpamr--is-new-package)
+      (cadr item)
+    (cdr item)))
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "We can use package-alist directly. This API will append some meta info into package-alist."
@@ -63,13 +68,19 @@
         found
         (i 0))
 
+    ;; package-archive-contents is the list of ALL packages
     (while (and (not found)
                 (< i (length package-archive-contents)))
       (setq package-content (nth i package-archive-contents))
-      ;; well, all we need do it to write the actual version into package-content
-      (when (string= name (car package-content))
-        ;; we try to provide more information from archive-contents if possible
-        (aset (cdr package-content) 0 (elt (cdr pkg) 0))
+      ;; well, all we need do is to write the actual version into package-content
+
+      (when (equal name (car package-content))
+        ;; real version used instead the one in archive-contents
+        (if (arrayp (elpamr--get-info-array package-content))
+            (elpamr--set-version
+             package-content
+             (elpamr--get-version pkg)))
+
         (setq item package-content)
         (setq found t)
         )
@@ -81,37 +92,13 @@
 
     (setq repo (elt (cdr package-content) 4))
     (if (listp repo)  (setq repo (elt (cdr package-content) 5)))
-    ;; (message "repo=%s" repo)
-    (cond
-     ((member repo elpamr-exclude-package-from-repositories)
+     (if (member repo elpamr-exclude-package-from-repositories)
       (setq item nil))
-     (t
-      (let ((a (cdr item)) na)
-        (cond
-         (found
-          (when (>= (length a) 4)
-            ;; only need first four
-            (setq na (vector (elt a 0)
-                             (elt a 1)
-                             (elt a 2)
-                             (elt a 3)))
-            (setq item (cons (car item) na))))
-         (t
-          ;; we assume it's tar format
-          (when (>= (length a) 3)
-            ;; only need first three
-            (setq na (vector (elt a 0)
-                             (elt a 1)
-                             (elt a 2)
-                             'tar))
-            (setq item (cons (car item) na))))
-         ))
-      ))
-    item
-    ))
+
+    item))
 
 
-(defun elpamr--package-info (dirname)
+(defun elpamr--extract-info-from-dir (dirname)
   "return '(package-name integer-version-number) or nil"
   (interactive)
   (let (rlt name version)
@@ -121,6 +108,12 @@
       (setq rlt (list name version)))
     rlt
     ))
+
+(defun elpamr--is-new-package ()
+  (or (and (>= emacs-major-version 24)
+           (>= emacs-minor-version 4))
+      (>= emacs-major-version 25))
+  )
 
 (defun elpamr--output-fullpath (file)
   "return full path of output file give the FILE"
@@ -137,10 +130,53 @@
 (defun elpamr--clean-package-description (descr)
   (replace-regexp-in-string "-\*-.*-\*-" "" descr t))
 
+(defun elpamr--set-version (item version)
+  (let ((a (elpamr--get-info-array item)))
+    (if (elpamr--is-new-package)
+        (aset a 2 version)
+      (aset a 0 version))
+    ))
+
+(defun elpamr--get-dependency (item)
+  (let ((a (elpamr--get-info-array item)))
+    (if (elpamr--is-new-package)
+        (elt a 4)
+      (elt a 1))
+    ))
+
+(defun elpamr--get-version (item)
+  (let ((a (elpamr--get-info-array item)))
+    (if (elpamr--is-new-package)
+        (elt a 2)
+      (elt a 0))
+    ))
+
+(defun elpamr--get-repo (item)
+  (let ((a (elpamr--get-info-array item)))
+    (if (elpamr--is-new-package)
+        (if (> (length a) 6)
+            (elt a 6) "legacy")
+      (if (> (length a) 4)
+          (elt a 4) "legacy"))
+    ))
+
+(defun elpamr--get-type (item)
+  (let ((a (elpamr--get-info-array item))
+        rlt)
+    (setq rlt
+          (if (elpamr--is-new-package)
+              (if (> (length a) 5)
+                  (elt a 5) 'tar)
+            (if (> (length a) 3)
+                (elt a 3) 'tar)
+            ))
+    (if (not rlt) (setq rlt 'tar))
+    rlt))
+
 (defun elpamr--create-complete-package-name (item)
   (concat (symbol-name (car item))
           "-"
-          (mapconcat (lambda (arg) (format "%d" arg)) (elt (cdr item) 0) ".")))
+          (mapconcat (lambda (arg) (format "%d" arg)) (elpamr--get-version item)  ".")))
 
 (defun elpamr--format-package-list-into-json (list)
   (let (pkg-name)
@@ -152,8 +188,13 @@
     ))
 
 (defun elpamr--is-single-el (item)
-  (let ((a (cdr item)))
-    (and (> (length a) 3) (string= "single" (elt a 3)))
+  (equal 'single (elpamr--get-type item)))
+
+(defun elpamr--get-description (item)
+  (let ((a (elpamr--get-info-array item)) )
+    (if (elpamr--is-new-package)
+        (elt a 3)
+      (elt a 2))
     ))
 
 (defun elpamr--format-package-list-into-html (list)
@@ -169,7 +210,7 @@
                tar-name
                tar-name
                cnt
-               (elpamr--clean-package-description (elt (cdr item) 2)))
+               (elpamr--clean-package-description (elpamr--get-description item)))
        ) list "\n")
     ))
 
@@ -234,34 +275,57 @@
         ))
     rlt))
 
+(defun elpamr--one-item-for-archive-contents (final-pkg)
+  (let ((a (elpamr--get-info-array final-pkg)) )
+    (format " (%s . [%S %S \"%s\" %S])\n"
+            (car final-pkg)
+            (elpamr--get-version final-pkg)
+            (elpamr--get-dependency final-pkg)
+            (elpamr--get-description final-pkg)
+            (elpamr--get-type final-pkg))
+    ))
+
+;;;###autoload
+(defun elpamr--version ()
+  (interactive)
+  (message "1.1.4"))
+
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed ()
   "Export INSTALLED packages into a new directory. Create html files for the mirror site.
 If elpamr-default-output-directory is not nil, it's assumed that is output directory. Or else, user will be asked to provide the output directory."
   (interactive)
-  (let (item rlt pkg-dirname pkg-info tar-cmd len dirs cnt)
+  (let (item final-pkg-list pkg-dirname pkg-info tar-cmd len dirs cnt)
+    ;; quoted from manual:
+    ;;   Alist of all packages available for activation.
+    ;;   Each element has the form (PKG . DESCS), where PKG is a package
+    ;;   name (a symbol) and DESCS is a non-empty list of `package-desc' structure,
+    ;;   sorted by decreasing versions.
     (dolist (pkg package-alist)
       (setq item (elpamr--create-one-item-for-archive-contents pkg))
-      (if item (push item rlt))
+      (if item (push item final-pkg-list))
       )
 
+    ;; set output directory
     (unless (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
       (setq elpamr-default-output-directory (read-directory-name "Output directory:"))
       )
 
-    (when (and (> (length rlt) 0)
+    (when (and (> (length final-pkg-list) 0)
                elpamr-default-output-directory
                (file-directory-p elpamr-default-output-directory))
+      ;; package-user-dir is ~/.emacs.d/elpa by default
       (setq dirs (directory-files package-user-dir))
+      ;; prepare to loop dirs
       (setq cnt 0)
       (setq len (length dirs))
       (dolist (dir dirs)
         (unless (or (member dir '("archives" "." ".."))
-                    (not (setq pkg-info (elpamr--package-info dir))))
+                    (not (setq pkg-info (elpamr--extract-info-from-dir dir))))
 
           (cond
            ;; copy single el
-           ((elpamr--is-single-el-by-name (car pkg-info) rlt)
+           ((elpamr--is-single-el-by-name (car pkg-info) final-pkg-list)
             (setq tar-cmd (concat "cd " package-user-dir
                                   "; cp "
                                   (file-name-as-directory dir) (car pkg-info) ".el"
@@ -270,7 +334,11 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
                                   ".el ")))
            ;; create tar using GNU tar or BSD tar
            (t
-            (setq tar-cmd (concat "cd " package-user-dir "; COPYFILE_DISABLE=\"\" tar cf " (elpamr--output-fullpath dir) ".tar --exclude=\"*.elc\" --exclude=\"*~\" " dir))
+            (setq tar-cmd (concat "cd "
+                                  package-user-dir
+                                  "; COPYFILE_DISABLE=\"\" tar cf "
+                                  (elpamr--output-fullpath dir) ".tar --exclude=\"*.elc\" --exclude=\"*~\" "
+                                  dir))
             ))
           (shell-command tar-cmd)
           (setq cnt (1+ cnt))
@@ -281,12 +349,12 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
       (with-temp-buffer
         (let ((print-level nil)  (print-length nil))
           (insert "(1\n")
-          (dolist (pkg rlt)
+          (dolist (final-pkg final-pkg-list)
             ;; each package occupies one line
-            (insert (format " %S\n" pkg)))
+            (insert (elpamr--one-item-for-archive-contents final-pkg)))
           (insert ")"))
         (write-file (elpamr--output-fullpath "archive-contents")))
-      (elpamr--output-html rlt)
+      (elpamr--output-html final-pkg-list)
       (message "DONE! Output into %s" elpamr-default-output-directory))
     ))
 
