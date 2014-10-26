@@ -4,7 +4,7 @@
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
-;; Version: 1.1.4
+;; Version: 1.1.5
 ;; Keywords: cloud mirror elpa
 ;;
 ;; This file is not part of GNU Emacs.
@@ -53,6 +53,8 @@
 (defvar elpamr-exclude-package-from-repositories
   '("myelpa")
   "exclude packages from certain repositories")
+
+(defvar elpamr-debug nil "show debug message")
 
 (defun elpamr--get-info-array (item)
   (if (elpamr--is-new-package)
@@ -288,7 +290,7 @@
 ;;;###autoload
 (defun elpamr--version ()
   (interactive)
-  (message "1.1.4"))
+  (message "1.1.5"))
 
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed ()
@@ -340,6 +342,14 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
                                   (elpamr--output-fullpath dir) ".tar --exclude=\"*.elc\" --exclude=\"*~\" "
                                   dir))
             ))
+
+          (when elpamr-debug
+            (message "elpamr-default-output-directory=%s" elpamr-default-output-directory)
+            (message "package-alist=%s" package-alist)
+            (message "package-user-dir=%s" package-user-dir)
+            (message "elpamr--output-fullpath" elpamr--output-fullpath)
+            (message "tar-cmd=%s" tar-cmd))
+
           (shell-command tar-cmd)
           (setq cnt (1+ cnt))
           (message "Creating *.tar and *.el ... %d%%" (/ (* cnt 100) len))
