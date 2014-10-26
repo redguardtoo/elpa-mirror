@@ -1,9 +1,11 @@
-* elpa-mirror (version 1.1.4)
+* elpa-mirror (version 1.1.5)
 It creates Emacs package repository at *memory stick*, plus everything for hosting an ELPA web site.
 
 Only *locally installed* packages will be included in the repository.
 
 A use case is to create a local respository for certain Emacs setup behind corporate firewall.
+
+Please note console command *tar* and *cp* is required.
 
 * Why use elpa-mirror
 - The repository could be either memory stick, or Dropbox folder, or github project
@@ -75,4 +77,9 @@ You can tweak the content of index.html a little bit.
 #+END_SRC
 
 * Contact me
-You can report bugs at [[https://github.com/redguardtoo/elpa-mirror]].
+- Insert below code into ~/.emacs,
+#+begin_src elisp
+(setq elpamr-debug t)
+#+end_src
+- Reproduce the bug
+- Send the output in Message buffer and other details to [[https://github.com/redguardtoo/elpa-mirror]].
