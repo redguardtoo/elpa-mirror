@@ -61,6 +61,9 @@
       (cadr item)
     (cdr item)))
 
+(defun elpamr--is-mac ()
+  (eq system-type 'darwin))
+
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "We can use package-alist directly. This API will append some meta info into package-alist."
   (let ((name (car pkg))
@@ -338,7 +341,9 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
            (t
             (setq tar-cmd (concat "cd "
                                   package-user-dir
-                                  "; COPYFILE_DISABLE=\"\" tar cf "
+                                  "; "
+                                  (if (elpamr--is-mac) "COPYFILE_DISABLE=\"\" " "")
+                                  "tar cf "
                                   (elpamr--output-fullpath dir) ".tar --exclude=\"*.elc\" --exclude=\"*~\" "
                                   dir))
             ))
@@ -347,7 +352,6 @@ If elpamr-default-output-directory is not nil, it's assumed that is output direc
             (message "elpamr-default-output-directory=%s" elpamr-default-output-directory)
             (message "package-alist=%s" package-alist)
             (message "package-user-dir=%s" package-user-dir)
-            (message "elpamr--output-fullpath" elpamr--output-fullpath)
             (message "tar-cmd=%s" tar-cmd))
 
           (shell-command tar-cmd)
