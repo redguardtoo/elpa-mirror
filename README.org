@@ -1,52 +1,39 @@
-* elpa-mirror (version 1.1.5)
-It creates Emacs package repository at *memory stick*, plus everything for hosting an ELPA web site.
+* elpa-mirror (version 1.2.0)
+Create Emacs package repository locally.
 
-Only *locally installed* packages will be included in the repository.
+Only *already installed* packages will be included in the repository.
 
-A use case is to create a local respository for certain Emacs setup behind corporate firewall.
 
 Please note console command *tar* and *cp* is required.
 
-* Why use elpa-mirror
-- The repository could be either memory stick, or Dropbox folder, or github project
-- You have full control of all packages. No dependency hell!
-- Hosting your own ELPA site has *ZERO* cost.
-- HTML files are optimized. Web traffic is minimum.
-- The web site supports both mobile and desktop.
-- tested with Emacs 23.4, Emacs 24.3, Emacs 24.4
+* Why
+- 15 seconds to install 115 packages
+- The repository could be hosted on USB/Dropbox/Github
+- Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5
 
 * Install
-Download elpa-mirror.el and place it somewhere (say "~/.emacs.d/my-lisp"),  then add below code into your .emacs:
+- Download elpa-mirror.el and place it somewhere (say "~/.emacs.d/site-lisp/elpa-mirror")
+- Add below code into your .emacs,
 #+BEGIN_SRC elisp
-(add-to-list 'load-path "~/.emacs.d/lisp/")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/elpa-mirror")
 (require 'elpa-mirror)
 #+END_SRC
-
-* Set up
-Nothing to set up.
-
 * Usage
-** Create a local repository
-"M-x elpamr-create-mirror-for-installed". That's it!
+Run `M-x elpamr-create-mirror-for-installed` to create local repository.
 
-All files needed to host ELPA site will be output into user specified directory.
-
-You can specify a default output directory,
-#+BEGIN_SRC elisp
-(setq elpamr-default-output-directory "~/myelpa")
-#+END_SRC
-
-** Use local repository
-Insert below code into your .emacs, assuming "~/myelpa" is the output directory of elpamr-create-mirror-for-installed:
+To use the local repository (say it's "~/myelpa"), insert below code into your ~/.emacs,
 #+BEGIN_SRC sh
 # Now elpa/marmalade/melpa site will be overrided
 (setq package-archives '(("myelpa" . "~/myelpa")))
 #+END_SRC
 
-** Build a remote repository (OPTIONAL)
-Upload everything into any web server or cloud service (apache/dropbox/github, etc).
-
-Then insert below code into .emacs:
+* Tips
+** Change a output directory,
+#+BEGIN_SRC elisp
+(setq elpamr-default-output-directory "~/myelpa")
+#+END_SRC
+** Repository on Dropbox
+Insert below code into .emacs:
 #+BEGIN_SRC sh
 # all-to-list will not override default elpa, so now you have to repositories, one is elpa, another is myelpa
 (add-to-list 'package-archives '("myelpa" . "https://dl.dropboxusercontent.com/u/858862/myelpa/"))
@@ -54,8 +41,7 @@ Then insert below code into .emacs:
 
 My home page is at [[https://dl.dropboxusercontent.com/u/858862/myelpa/index.html]].
 
-* Tips (OPTIONAL)
-You can tweak the content of index.html a little bit.
+** Tweak the content of index.html
 
 #+BEGIN_SRC elisp
 ;; default output directory
@@ -76,10 +62,10 @@ You can tweak the content of index.html a little bit.
 (setq elpamr-exclude-package-from-repositories '("myelpa" "gnu" "melpa"))
 #+END_SRC
 
-* Contact me
+* Report bug
 - Insert below code into ~/.emacs,
 #+begin_src elisp
 (setq elpamr-debug t)
 #+end_src
 - Reproduce the bug
-- Send the output in Message buffer and other details to [[https://github.com/redguardtoo/elpa-mirror]].
+- Go [[https://github.com/redguardtoo/elpa-mirror]]
