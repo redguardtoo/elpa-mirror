@@ -126,11 +126,16 @@
                   (file-name-as-directory elpamr-default-output-directory)
                   file)))
 
-(defun elpamr--get-string-from-file (filePath)
-  "Return filePath's file content."
-  (with-temp-buffer
-    (insert-file-contents filePath)
-    (buffer-string)))
+(defun elpamr--get-html-content ()
+  "npm install -g minify; minify index.html | pclip"
+  (let (rlt)
+    (setq rlt "<!DOCTYPE html><html lang=en><head><meta charset='utf-8'><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content><title>My Emacs packages</title><style>.clear{clear:both;width:100%}.code{background-color:#DCDCDC;border:1px solid #B5B5B5;border-radius:3px;display:inline-block;margin:0;max-width:100%;overflow:auto;padding:0;vertical-align:middle}.spacer{margin:10px 0}@media screen and (max-width:1024px){ul{list-style-type:none;padding-left:8px}#quickstart,#upgrade,.descr,.name{width:100%}.name{padding-top:5px}.descr{border-bottom:1px solid;padding-bottom:5px}}@media screen and (min-width:1025px){#quickstart{float:left;width:50%}#upgrade{float:right;width:50%}.name{float:left;width:50%}.descr{float:right;width:50%}}</style><body><div class=clear><div id=quickstart><h2>Quick Start</h2><ul id=usage><li><a href=http://repo.or.cz/w/emacs.git/blob_plain/1a0a666f941c99882093d7bd08ced15033bc3f0c:/lisp/emacs-lisp/package.el>First, if you are not using Emacs 24, install package.el</a>.</li><li>Add to your .emacs:<br><pre class='code spacer'>(require 'package)
+(add-to-list 'package-archives
+          '(\"elpamr-repository-name\" .
+          \"elpamr-repository-path\"))
+          (package-initialize)</pre><br>In above code, you can use full path of file directory instead of URL.</li><li><span class=code>M-x eval-buffer</span> to evaluate it, and then do <span class=code>M-x package-refresh-contents</span> to load in the package listing.</li><li>You're good to go!</li><li><strong>OPTIONAL</strong>, please see <a href=http://www.emacswiki.org/emacs/ELPA>EmacsWiki</a> for advanced stuff.</li><li><strong>OPTIONAL</strong>, to upgrade specific package, please download tar file and run <span class=code>M-x package-install-file</span>.</li></ul></div><div id=upgrade><h2>Upgrade package</h2><ul><li>Please email to elpamr-email for upgrading specific package.</li><li>The email subject <strong>should</strong> start with <span class=code>ELPA-PACKAGE-yyyymmdd</span> (yyyymmdd is the date string like '20140215').</li><li>The remaining part of subject should either be empty string or the full package name with version number like 'cl-lib-0.5.tar'.</li><li>If the package name is not in the subject, you should attach the package itself in email</li><li>You can explain why you need upgrade in email body or just leave it empty</li></ul></div></div><div class=clear><h2>List of Packages</h2><form method=post id=searchForm action><p><label for=filter>Filter:</label><input id=filter placeholder='Input package name here'> <input type=button value=reset id='reset'></p></form>elpamr-package-list-html</div><script>var dic=[elpamr-package-list-json];</script><script src=//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js></script><script>$(document).ready(function(){var e=function(){for(var e,i,n=$('#filter').val().replace(/^\s+|\s+$/g,''),c=1,r=dic.length;r>=c;c++)e=$('#n'+c),i=$('#d'+c),''!==n&&-1===dic[c-1].indexOf(n)?(e.hide(),i.hide()):(e.show(),i.show())};$('#filter').keyup(e),$('#reset').click(function(){$('#filter').val(''),e()})});</script>
+")
+    rlt))
 
 (defun elpamr--clean-package-description (descr)
   (replace-regexp-in-string "-\*-.*-\*-" "" descr t))
@@ -239,7 +244,7 @@
         (setq str (replace-regexp-in-string
                  "elpamr-package-list-html"
                  (elpamr--format-package-list-into-html rlt)
-                 (elpamr--get-string-from-file html-tmpl)
+                 (elpamr--get-html-content)
                  t))
         (setq str (replace-regexp-in-string
                    "elpamr-package-list-json"
@@ -263,12 +268,6 @@
                    t))
         (insert str))
       (write-file html-file))
-
-    ;; js file
-    (with-temp-buffer
-      (let ((print-level nil)  (print-length nil))
-        (insert (elpamr--get-string-from-file js-tmpl)))
-      (write-file js-file))
     ))
 
 (defun elpamr--is-single-el-by-name (name pkglist)
