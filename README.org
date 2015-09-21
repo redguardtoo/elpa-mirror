@@ -1,11 +1,12 @@
 * elpa-mirror (version 1.2.0)
+
+[[http://melpa.org/#/elpa-mirror][file:http://melpa.org/packages/elpa-mirror-badge.svg]] [[http://stable.melpa.org/#/elpa-mirror][file:http://stable.melpa.org/packages/elpa-mirror-badge.svg]]
+
 Create Emacs package repository locally.
 
 Only *already installed* packages will be included in the repository.
 
-
 Please note console command *tar* and *cp* is required.
-
 * Why
 - 15 seconds to install 115 packages
 - The repository could be hosted on USB/Dropbox/Github
