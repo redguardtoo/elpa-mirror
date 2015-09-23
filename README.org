@@ -4,17 +4,16 @@
 
 Create Emacs package repository locally.
 
-Only *already installed* packages will be included in the repository.
+Only *locally installed* packages will be included in the repository.
 
 Please note console command *tar* and *cp* is required.
 * Why
 - 15 seconds to install 115 packages
 - The repository could be hosted on USB/Dropbox/Github
-- Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5
-
+- Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5 on (OSX/Cygwin/Windows/Linux)
 * Install
-- Download elpa-mirror.el and place it somewhere (say "~/.emacs.d/site-lisp/elpa-mirror")
-- Add below code into your .emacs,
+- Download elpa-mirror.el to somewhere (say "~/.emacs.d/site-lisp/elpa-mirror")
+- Add below code into your ~/.emacs,
 #+BEGIN_SRC elisp
 (add-to-list 'load-path "~/.emacs.d/site-lisp/elpa-mirror")
 (require 'elpa-mirror)
@@ -35,15 +34,22 @@ To use the local repository (say it's "~/myelpa"), insert below code into your ~
 #+END_SRC
 ** Repository on Dropbox
 Insert below code into .emacs:
-#+BEGIN_SRC sh
-# all-to-list will not override default elpa, so now you have to repositories, one is elpa, another is myelpa
-(add-to-list 'package-archives '("myelpa" . "https://dl.dropboxusercontent.com/u/858862/myelpa/"))
+#+BEGIN_SRC elisp
+;; all-to-list will not override default elpa.
+;; So now you have two repositories.
+;; One is GNU elpa. Another is myelpa
+(add-to-list 'package-archives
+             '("myelpa" . "https://dl.dropboxusercontent.com/u/858862/myelpa/"))
 #+END_SRC
+** Repository on Github
+My repository is [[https://github.com/redguardtoo/myelpa]].
 
-My home page is at [[https://dl.dropboxusercontent.com/u/858862/myelpa/index.html]].
-
-** Tweak the content of index.html
-
+Insert below code into .emacs:
+#+BEGIN_SRC elisp
+(add-to-list 'package-archives
+             '("myelpa" . "https://raw.githubusercontent.com/redguardtoo/myelpa/master/"))
+#+END_SRC
+** Tweak the content of index.html (OPTIONAL)
 #+BEGIN_SRC elisp
 ;; default output directory
 (setq elpamr-default-output-directory "~/myelpa")
@@ -64,9 +70,5 @@ My home page is at [[https://dl.dropboxusercontent.com/u/858862/myelpa/index.htm
 #+END_SRC
 
 * Report bug
-- Insert below code into ~/.emacs,
-#+begin_src elisp
-(setq elpamr-debug t)
-#+end_src
-- Reproduce the bug
-- Go [[https://github.com/redguardtoo/elpa-mirror]]
+- Insert `(setq elpamr-debug t)` into ~/.emacs
+- Reproduce bug and go [[https://github.com/redguardtoo/elpa-mirror]]
