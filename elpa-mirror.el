@@ -143,7 +143,7 @@ This API will append some meta info into package-alist."
     rlt))
 
 (defun elpamr--clean-package-description (descr)
-  (replace-regexp-in-string "-\*-.*-\*-" "" descr t))
+  (replace-regexp-in-string "-\*-.*-\*-" "" (replace-regexp-in-string "\"" "" descr t) t))
 
 (defun elpamr--set-version (item version)
   (let ((a (elpamr--get-info-array item)))
@@ -289,7 +289,7 @@ This API will append some meta info into package-alist."
             (car final-pkg)
             (elpamr--get-version final-pkg)
             (elpamr--get-dependency final-pkg)
-            (elpamr--get-description final-pkg)
+            (elpamr--clean-package-description (elpamr--get-description final-pkg))
             (elpamr--get-type final-pkg))))
 
 ;;;###autoload
