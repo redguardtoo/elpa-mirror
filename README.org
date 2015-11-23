@@ -1,15 +1,15 @@
-* elpa-mirror (version 1.2.0)
+* elpa-mirror (v1.2.1)
 
 [[http://melpa.org/#/elpa-mirror][file:http://melpa.org/packages/elpa-mirror-badge.svg]] [[http://stable.melpa.org/#/elpa-mirror][file:http://stable.melpa.org/packages/elpa-mirror-badge.svg]]
 
-Create Emacs package repository locally.
+Create local Emacs package repository.
 
-Only *locally installed* packages will be included in the repository.
+Only *installed* packages will be included in the repository.
 
 Please note console command *tar* and *cp* is required.
 * Why
 - 15 seconds to install 115 packages
-- The repository could be hosted on USB/Dropbox/Github
+- The repository could be hosted on USB/Dropbox/Github, so you can install packages behind corp firewall
 - Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5 on (OSX/Cygwin/Windows/Linux)
 * Install
 - Download elpa-mirror.el to somewhere (say "~/.emacs.d/site-lisp/elpa-mirror")
@@ -19,14 +19,13 @@ Please note console command *tar* and *cp* is required.
 (require 'elpa-mirror)
 #+END_SRC
 * Usage
-Run `M-x elpamr-create-mirror-for-installed` to create local repository.
+`M-x elpamr-create-mirror-for-installed` to create local repository.
 
-To use the local repository (say it's "~/myelpa"), insert below code into your ~/.emacs,
+To use the repository. Say it's "~/myelpa", insert below code into your ~/.emacs,
 #+BEGIN_SRC sh
 # Now elpa/marmalade/melpa site will be overrided
 (setq package-archives '(("myelpa" . "~/myelpa")))
 #+END_SRC
-
 * Tips
 ** Change a output directory,
 #+BEGIN_SRC elisp
@@ -68,7 +67,6 @@ Insert below code into .emacs:
 ;; "melpa" means packages hosted on http://melpa.milkbox.net
 (setq elpamr-exclude-package-from-repositories '("myelpa" "gnu" "melpa"))
 #+END_SRC
-
 * Report bug
 - Insert `(setq elpamr-debug t)` into ~/.emacs
 - Reproduce bug and go [[https://github.com/redguardtoo/elpa-mirror]]

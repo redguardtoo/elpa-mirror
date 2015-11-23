@@ -1,10 +1,10 @@
-;;; elpa-mirror.el --- ELPA mirror from locally installed packages is easy
+;;; elpa-mirror.el --- Create local package repository
 
 ;; Copyright (C) 2014 Chen Bin
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
-;; Version: 1.2.0
+;; Version: 1.2.1
 ;; Keywords: cloud mirror elpa
 ;;
 ;; This file is not part of GNU Emacs.
@@ -293,10 +293,10 @@ This API will append some meta info into package-alist."
             (elpamr--get-type final-pkg))))
 
 ;;;###autoload
-(defun elpamr--version ()
+(defun elpamr-version ()
   "Current version."
   (interactive)
-  (message "1.2.0"))
+  (message "1.2.1"))
 
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed ()
