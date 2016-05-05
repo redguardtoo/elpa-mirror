@@ -1,4 +1,4 @@
-* elpa-mirror (v1.2.1)
+* elpa-mirror (v1.2.2)
 
 [[http://melpa.org/#/elpa-mirror][file:http://melpa.org/packages/elpa-mirror-badge.svg]] [[http://stable.melpa.org/#/elpa-mirror][file:http://stable.melpa.org/packages/elpa-mirror-badge.svg]]
 
@@ -9,7 +9,7 @@ Only *installed* packages will be included in the repository.
 Please note console command *tar* and *cp* is required.
 * Why
 - 15 seconds to install 115 packages
-- The repository could be hosted on USB/Dropbox/Github, so you can install packages behind corp firewall
+- The repository could be hosted on USB/Dropbox/GitHub, so you can install packages behind corp firewall
 - Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5 on (OSX/Cygwin/Windows/Linux)
 * Install
 - Download elpa-mirror.el to somewhere (say "~/.emacs.d/site-lisp/elpa-mirror")
@@ -27,10 +27,14 @@ To use the repository. Say it's "~/myelpa", insert below code into your ~/.emacs
 (setq package-archives '(("myelpa" . "~/myelpa")))
 #+END_SRC
 * Tips
-** Change a output directory,
+** Change output directory,
 #+BEGIN_SRC elisp
 (setq elpamr-default-output-directory "~/myelpa")
 #+END_SRC
+** Create repository in Bash shell
+#+begin_src bash
+emacs --batch -l ~/.emacs.d/init.el -l ~/projs/elpa-mirror/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
+#+end_src
 ** Repository on Dropbox
 Insert below code into .emacs:
 #+BEGIN_SRC elisp
@@ -40,32 +44,13 @@ Insert below code into .emacs:
 (add-to-list 'package-archives
              '("myelpa" . "https://dl.dropboxusercontent.com/u/858862/myelpa/"))
 #+END_SRC
-** Repository on Github
+** Repository on GitHub
 My repository is [[https://github.com/redguardtoo/myelpa]].
 
 Insert below code into .emacs:
 #+BEGIN_SRC elisp
 (add-to-list 'package-archives
              '("myelpa" . "https://raw.githubusercontent.com/redguardtoo/myelpa/master/"))
-#+END_SRC
-** Tweak the content of index.html (OPTIONAL)
-#+BEGIN_SRC elisp
-;; default output directory
-(setq elpamr-default-output-directory "~/myelpa")
-
-;; displayed in sample code of index.html
-(setq elpamr-repository-name "myelpa")
-
-;; displayed in sample code of index.html
-(setq elpamr-repository-path "http://myelpa.mydomain.com")
-
-;; contact email, displayed in index.html
-(setq elpamr-email "myname@gmail.com")
-
-;; when exporting installed packages, ignore packages from these repositories
-;; "gnu" means packages hosted on http://elpa.gnu.org
-;; "melpa" means packages hosted on http://melpa.milkbox.net
-(setq elpamr-exclude-package-from-repositories '("myelpa" "gnu" "melpa"))
 #+END_SRC
 * Report bug
 - Insert `(setq elpamr-debug t)` into ~/.emacs
