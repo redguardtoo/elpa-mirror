@@ -19,11 +19,11 @@ Please note console command *tar* and *cp* is required.
 (require 'elpa-mirror)
 #+END_SRC
 * Usage
-`M-x elpamr-create-mirror-for-installed` to create local repository.
+=M-x elpamr-create-mirror-for-installed= to create local repository.
 
 To use the repository. Say it's "~/myelpa", insert below code into your ~/.emacs,
 #+BEGIN_SRC sh
-# Now elpa/marmalade/melpa site will be overrided
+# myelpa is the ONLY repository now
 (setq package-archives '(("myelpa" . "~/myelpa")))
 #+END_SRC
 * Tips
@@ -32,6 +32,7 @@ To use the repository. Say it's "~/myelpa", insert below code into your ~/.emacs
 (setq elpamr-default-output-directory "~/myelpa")
 #+END_SRC
 ** Create repository in Bash shell
+You don't need even install elpa-mirror if use this way,
 #+begin_src bash
 emacs --batch -l ~/.emacs.d/init.el -l ~/projs/elpa-mirror/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
 #+end_src
@@ -53,5 +54,5 @@ Insert below code into .emacs:
              '("myelpa" . "https://raw.githubusercontent.com/redguardtoo/myelpa/master/"))
 #+END_SRC
 * Report bug
-- Insert `(setq elpamr-debug t)` into ~/.emacs
+- Insert =(setq elpamr-debug t)= into ~/.emacs
 - Reproduce bug and go [[https://github.com/redguardtoo/elpa-mirror]]
