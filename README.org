@@ -31,10 +31,10 @@ To use the repository. Say it's "~/myelpa", insert below code into your ~/.emacs
 #+BEGIN_SRC elisp
 (setq elpamr-default-output-directory "~/myelpa")
 #+END_SRC
-** Create repository in Bash shell
-You don't need even install elpa-mirror if use this way,
+** Create repository in Shell
+You don't need even install elpa-mirror if running it in shell,
 #+begin_src bash
-emacs --batch -l ~/.emacs.d/init.el -l ~/projs/elpa-mirror/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
+mkdir -p ~/myelpa && emacs --batch -l ~/.emacs.d/init.el -l ~/any-directory-you-prefer/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
 #+end_src
 ** Repository on Dropbox
 Insert below code into .emacs:
