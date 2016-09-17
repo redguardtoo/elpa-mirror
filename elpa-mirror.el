@@ -304,7 +304,10 @@ Or else, user will be asked to provide the output directory."
                                   (elpamr--executable-find "tar")
                                   " cf "
                                   (elpamr--output-fullpath dir) ".tar --exclude=\"*.elc\" --exclude=\"*~\" "
-                                  (elpamr--input-fullpath dir)))))
+                                  " -C "
+                                  package-user-dir
+                                  " "
+                                  dir))))
 
           ;; for windows
           (if elpamr-debug (message "tar-cmd=%s" tar-cmd))
