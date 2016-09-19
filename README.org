@@ -10,7 +10,7 @@ Please note console command *tar* and *cp* is required.
 * Why
 - 15 seconds to install 115 packages
 - The repository could be hosted on USB/Dropbox/GitHub, so you can install packages behind corp firewall
-- Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5 on (OSX/Cygwin/Windows/Linux)
+- Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5 on OSX/Cygwin/Windows/Linux
 * Install
 - Download elpa-mirror.el to somewhere (say "~/.emacs.d/site-lisp/elpa-mirror")
 - Add below code into your ~/.emacs,
