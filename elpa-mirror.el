@@ -242,6 +242,16 @@ This API will append some meta info into package-alist."
             (elpamr--clean-package-description (elpamr--get-description final-pkg))
             (elpamr--get-type final-pkg))))
 
+(defun elpamr-get-mirror-packages (mirror-directory)
+  "Return all package's name in a mirror directory: MIRROR-DIRECTROY."
+  (when (and mirror-directory (stringp mirror-directory))
+    (let ((file (concat (file-name-directory mirror-directory)
+                        "archive-contents")))
+      (when (file-exists-p file)
+        (mapcar #'car (cdr (read (with-temp-buffer
+                                   (insert-file-contents file)
+                                   (buffer-string)))))))))
+
 ;;;###autoload
 (defun elpamr-version ()
   "Current version."
