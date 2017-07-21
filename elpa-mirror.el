@@ -48,14 +48,16 @@
 ;;; Code:
 (require 'package)
 
-(defvar elpamr-default-output-directory
-  nil
+(defcustom elpamr-default-output-directory nil
   "The output directory.
-If nil, you need provide one when `elpamr-create-mirror-for-installed'.")
+If nil, you need provide one when `elpamr-create-mirror-for-installed'."
+  :type '(choice directory (const :tags "None" nil))
+  :group 'elpa-mirror)
 
-(defvar elpamr-exclude-package-from-repositories
-  '("myelpa")
-  "Exclude packages from certain repositories.")
+(defcustom elpamr-exclude-package-from-repositories '("myelpa")
+  "Exclude packages from certain repositories."
+  :type '(repeat string)
+  :group 'elpa-mirror)
 
 (defvar elpamr-debug nil "Show debug message.")
 
