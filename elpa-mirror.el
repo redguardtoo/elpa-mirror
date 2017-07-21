@@ -165,10 +165,6 @@ This API will append some meta info into package-alist."
 (defun elpamr--input-fullpath (file)
   (elpamr--fullpath package-user-dir file))
 
-(defun elpamr--output-fullpath (file &optional no-convertion)
-  "Return full path of output file, given the FILE."
-  (elpamr--fullpath elpamr-default-output-directory file no-convertion))
-
 (defun elpamr--clean-package-description (descr)
   (replace-regexp-in-string "-\*-.*-\*-" ""
                             (replace-regexp-in-string "\"" "" descr t)
@@ -259,11 +255,15 @@ This API will append some meta info into package-alist."
   (message "2.1.0"))
 
 ;;;###autoload
-(defun elpamr-create-mirror-for-installed ()
+(defun elpamr-create-mirror-for-installed (&optional output-directory)
   "Export INSTALLED packages into a new directory.
 Create the html files for the mirror site.
-`elpamr-default-output-directory' is output directory if non-nil.
-Or else, user will be asked to provide the output directory."
+
+The first valid directory found from the below list
+will be used as mirror package's output directory:
+1. Argument: OUTPUT-DIRECTORY
+2. Variable: `elpamr-default-output-directory'
+3. Ask user to provide."
   (interactive)
   (let* (item
          final-pkg-list
@@ -283,12 +283,22 @@ Or else, user will be asked to provide the output directory."
       (if item (push item final-pkg-list)))
 
     ;; set output directory
-    (unless (and elpamr-default-output-directory (file-directory-p elpamr-default-output-directory))
-      (setq elpamr-default-output-directory (read-directory-name "Output directory:")))
+    (setq output-directory
+          (cond ((and output-directory
+                      (stringp output-directory))
+                 (file-name-as-directory output-directory))
+                ((and elpamr-default-output-directory
+                      (stringp elpamr-default-output-directory))
+                 (file-name-as-directory elpamr-default-output-directory))
+                (t (read-directory-name "Output directory:"))))
+
+    ;; Create output directory if it is not exist.
+    (unless (file-directory-p output-directory)
+      (make-directory output-directory t))
 
     (when (and (> (length final-pkg-list) 0)
-               elpamr-default-output-directory
-               (file-directory-p elpamr-default-output-directory))
+               output-directory
+               (file-directory-p output-directory))
 
       (dolist (dir dirs)
         (unless (or (member dir '("archives" "." ".."))
@@ -298,16 +308,20 @@ Or else, user will be asked to provide the output directory."
            ((elpamr--is-single-el-by-name (car pkg-info) final-pkg-list)
             (setq tar-cmd (concat (elpamr--executable-find "cp")
                                   " "
-                                  (elpamr--input-fullpath (concat (file-name-as-directory dir) (car pkg-info) ".el"))
+                                  (elpamr--input-fullpath
+                                   (concat (file-name-as-directory dir)
+                                           (car pkg-info) ".el"))
                                   " "
-                                  (elpamr--output-fullpath (concat dir ".el")))))
+                                  (elpamr--fullpath output-directory
+                                                    (concat dir ".el")))))
            ;; create tar using GNU tar
            ;; BSD tar need set environment variable COPYFILE_DISABLE
            (t
             (setq tar-cmd (concat (if (elpamr--is-mac) "COPYFILE_DISABLE=\"\" " "")
                                   (elpamr--executable-find "tar")
                                   " cf "
-                                  (elpamr--output-fullpath dir) ".tar --exclude=\"*.elc\" --exclude=\"*~\" "
+                                  (elpamr--fullpath output-directory dir)
+                                  ".tar --exclude=\"*.elc\" --exclude=\"*~\" "
                                   " -C "
                                   package-user-dir
                                   " "
@@ -328,8 +342,9 @@ Or else, user will be asked to provide the output directory."
             ;; each package occupies one line
             (insert (elpamr--one-item-for-archive-contents final-pkg)))
           (insert ")"))
-        (write-file (elpamr--output-fullpath "archive-contents" t)))
-      (message "DONE! Output into %s" elpamr-default-output-directory))))
+        (write-file (elpamr--fullpath output-directory
+                                      "archive-contents" t)))
+      (message "DONE! Output into %s" output-directory))))
 
 (provide 'elpa-mirror)
 ;;; elpa-mirror.el ends here
