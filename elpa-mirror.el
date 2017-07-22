@@ -261,7 +261,7 @@ This API will append some meta info into package-alist."
   (message "2.1.0"))
 
 ;;;###autoload
-(defun elpamr-create-mirror-for-installed (&optional output-directory)
+(defun elpamr-create-mirror-for-installed (&optional output-directory recreate-directory)
   "Export INSTALLED packages into a new directory.
 Create the html files for the mirror site.
 
@@ -269,7 +269,10 @@ The first valid directory found from the below list
 will be used as mirror package's output directory:
 1. Argument: OUTPUT-DIRECTORY
 2. Variable: `elpamr-default-output-directory'
-3. Ask user to provide."
+3. Ask user to provide.
+
+When RECREATE-DIRECTORY is non-nil, OUTPUT-DIRECTORY
+will be deleted and recreated."
   (interactive)
   (let* (item
          final-pkg-list
@@ -297,6 +300,12 @@ will be used as mirror package's output directory:
                       (stringp elpamr-default-output-directory))
                  (file-name-as-directory elpamr-default-output-directory))
                 (t (read-directory-name "Output directory:"))))
+
+    ;; Delete output directory if we need a clean output directory
+    (when (and recreate-directory
+               (file-directory-p output-directory))
+      (message "Recreate %s" output-directory)
+      (delete-directory output-directory t))
 
     ;; Create output directory if it is not exist.
     (unless (file-directory-p output-directory)
