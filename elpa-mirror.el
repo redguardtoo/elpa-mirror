@@ -59,6 +59,12 @@ If nil, you need provide one when `elpamr-create-mirror-for-installed'."
   :type '(repeat string)
   :group 'elpa-mirror)
 
+(defcustom elpamr-finished-hook nil
+  "Hook run when command `elpamr-create-mirror-for-installed' run finished.
+The hook function have one argument: output-directory."
+  :group 'elpa-mirror
+  :type 'hook)
+
 (defvar elpamr-debug nil "Show debug message.")
 
 (defun elpamr--get-info-array (item)
@@ -241,7 +247,7 @@ This API will append some meta info into package-alist."
 (defun elpamr-get-mirror-packages (mirror-directory)
   "Return all package's name in a mirror directory: MIRROR-DIRECTROY."
   (when (and mirror-directory (stringp mirror-directory))
-    (let ((file (concat (file-name-directory mirror-directory)
+    (let ((file (concat (file-name-as-directory mirror-directory)
                         "archive-contents")))
       (when (file-exists-p file)
         (mapcar #'car (cdr (read (with-temp-buffer
@@ -344,6 +350,7 @@ will be used as mirror package's output directory:
           (insert ")"))
         (write-file (elpamr--fullpath output-directory
                                       "archive-contents" t)))
+      (run-hook-with-args 'elpamr-finished-hook output-directory)
       (message "DONE! Output into %s" output-directory))))
 
 (provide 'elpa-mirror)
