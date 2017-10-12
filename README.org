@@ -2,12 +2,13 @@
 
 [[http://melpa.org/#/elpa-mirror][file:http://melpa.org/packages/elpa-mirror-badge.svg]] [[http://stable.melpa.org/#/elpa-mirror][file:http://stable.melpa.org/packages/elpa-mirror-badge.svg]]
 
-Create local Emacs package repository.
+Create local Emacs package repository so package upgrade never breaks.
 
 Only *installed* packages will be included in the repository.
 
 Please note console command *tar* and *cp* is required.
 * Why
+- Full package upgrade never breaks Emacs setup
 - 15 seconds to install 115 packages
 - The repository could be hosted on USB/Dropbox/GitHub, so you can install packages behind corp firewall
 - Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5 on OSX/Cygwin/Windows/Linux
@@ -57,4 +58,4 @@ Insert below code into .emacs:
 #+END_SRC
 * Report bug
 - Insert =(setq elpamr-debug t)= into ~/.emacs
-- Reproduce bug and go [[https://github.com/redguardtoo/elpa-mirror]]
+- Reproduce bug and report at [[https://github.com/redguardtoo/elpa-mirror]]

@@ -1,6 +1,6 @@
-;;; elpa-mirror.el --- Create local package repository
+;;; elpa-mirror.el --- Create local package repository so package upgrade never breaks
 
-;; Copyright (C) 2014 Chen Bin
+;; Copyright (C) 2014-2017 Chen Bin
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
@@ -33,7 +33,7 @@
 ;;  If you use native Windows Emacs, install Cygwin or MSYS2.
 ;;
 ;; Usage in Shell,
-;;   emacs --batch -l ~/.emacs.d/init.el
+;;   Emacs --batch -l ~/.emacs.d/init.el
 ;;         -l ~/any-directory-you-prefer/elpa-mirror.el \
 ;;         --eval='(setq elpamr-default-output-directory "~/myelpa")' \
 ;;         --eval='(elpamr-create-mirror-for-installed)
@@ -68,16 +68,19 @@ The hook function have one argument: output-directory."
 (defvar elpamr-debug nil "Show debug message.")
 
 (defun elpamr--get-info-array (item)
+  "Extract package information from ITEM."
   (if (elpamr--is-new-package)
       (cadr item)
     (cdr item)))
 
 (defun elpamr--is-mac ()
+  "Is macOS?"
   (eq system-type 'darwin))
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
-  "We can use package-alist directly.
-This API will append some meta info into package-alist."
+  "We can use `package-alist 'directly.
+This API will append some meta info into `package-alist'.
+Name of PKG is extracted."
   (let* ((name (car pkg))
          item
          package-content
@@ -116,7 +119,8 @@ This API will append some meta info into package-alist."
 
 
 (defun elpamr--extract-info-from-dir (dirname)
-  "Return `(list package-name integer-version-number)' or nil."
+  "Extract information from DIRNAME.
+Return `(list package-name integer-version-number)' or nil."
   (interactive)
   (if (string-match "\\(.*\\)-\\([0-9.]+\\)$" dirname)
       ;; (list name version)
@@ -130,10 +134,12 @@ This API will append some meta info into package-alist."
       (>= emacs-major-version 25)))
 
 (defun elpamr--win-executable-find (driver path exe)
+  "GNU Find executable with DRIVER/PATH/EXE information provided."
   (if (executable-find (concat driver path exe))
       (concat driver path exe)))
 
 (defun elpamr--executable-find (exe)
+  "GNU Find EXE on Windows."
   (or (and (eq system-type 'windows-nt)
            (or
             ;; cygwin
@@ -156,7 +162,8 @@ This API will append some meta info into package-alist."
       exe))
 
 (defun elpamr--fullpath (parent file &optional no-convertion)
-  "Full path of 'parent/file'."
+  "Full path of 'PARENT/FILE'.
+If NO-CONVERTION is t,  it's UNIX path."
   (let* ((rlt (file-truename (concat (file-name-as-directory parent) file))))
     (if (and (eq system-type 'windows-nt) (not no-convertion))
         (let* ((cyg-cmd (format "%s -u \"%s\""
@@ -169,32 +176,38 @@ This API will append some meta info into package-alist."
     rlt))
 
 (defun elpamr--input-fullpath (file)
+  "FILE's full path."
   (elpamr--fullpath package-user-dir file))
 
-(defun elpamr--clean-package-description (descr)
+(defun elpamr--clean-package-description (description)
+  "Clean DESCRIPTION."
   (replace-regexp-in-string "-\*-.*-\*-" ""
-                            (replace-regexp-in-string "\"" "" descr t)
+                            (replace-regexp-in-string "\"" "" description t)
                             t))
 
 (defun elpamr--set-version (item version)
+  "Set ITEM's VERSION."
   (let* ((a (elpamr--get-info-array item)))
     (if (elpamr--is-new-package)
         (aset a 2 version)
       (aset a 0 version))))
 
 (defun elpamr--get-dependency (item)
+  "Get ITEM's dependency."
   (let* ((a (elpamr--get-info-array item)))
     (if (elpamr--is-new-package)
         (elt a 4)
       (elt a 1))))
 
 (defun elpamr--get-version (item)
+  "Get ITEM's version."
   (let* ((a (elpamr--get-info-array item)))
     (if (elpamr--is-new-package)
         (elt a 2)
       (elt a 0))))
 
 (defun elpamr--get-repo (item)
+  "Get ITEM's repository."
   (let* ((a (elpamr--get-info-array item)))
     (if (elpamr--is-new-package)
         (if (> (length a) 6)
@@ -203,6 +216,7 @@ This API will append some meta info into package-alist."
           (elt a 4) "legacy"))))
 
 (defun elpamr--get-type (item)
+  "Get ITEM's type."
   (let* ((a (elpamr--get-info-array item))
          (rlt (if (elpamr--is-new-package)
                   (if (> (length a) 5)
@@ -213,6 +227,7 @@ This API will append some meta info into package-alist."
     rlt))
 
 (defun elpamr--create-complete-package-name (item)
+  "Create package name from ITEM."
   (concat (symbol-name (car item))
           "-"
           (mapconcat (lambda (arg)
@@ -220,15 +235,18 @@ This API will append some meta info into package-alist."
                      (elpamr--get-version item)  ".")))
 
 (defun elpamr--is-single-el (item)
+  "Is ITEM an single Emacs Lisp file?"
   (equal 'single (elpamr--get-type item)))
 
 (defun elpamr--get-description (item)
+  "Get ITEM's description."
   (let* ((a (elpamr--get-info-array item)) )
     (if (elpamr--is-new-package)
         (elt a 3)
       (elt a 2))))
 
 (defun elpamr--is-single-el-by-name (name pkglist)
+  "Is single Emacs Lisp file by querying NAME and PKGLIST."
   (let* (rlt)
     (dolist (pkg pkglist)
       (if (string= (car pkg) name)
@@ -236,6 +254,7 @@ This API will append some meta info into package-alist."
     rlt))
 
 (defun elpamr--one-item-for-archive-contents (final-pkg)
+  "Format FINAL-PKG's information into a string for archive-contents."
   (let* ((a (elpamr--get-info-array final-pkg)))
     (format " (%s . [%S %S \"%s\" %S])\n"
             (car final-pkg)
@@ -245,7 +264,7 @@ This API will append some meta info into package-alist."
             (elpamr--get-type final-pkg))))
 
 (defun elpamr-get-mirror-packages (mirror-directory)
-  "Return all package's name in a mirror directory: MIRROR-DIRECTROY."
+  "Return all package's name in MIRROR-DIRECTORY."
   (when (and mirror-directory (stringp mirror-directory))
     (let ((file (concat (file-name-as-directory mirror-directory)
                         "archive-contents")))
