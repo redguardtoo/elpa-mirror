@@ -6,9 +6,11 @@ Create local Emacs package repository so package upgrade never breaks.
 
 Only *installed* packages will be included in the repository.
 
-Please note console command *tar* and *cp* is required.
+Please note:
+- CLI program *tar* and *cp* is required.
+- Since v2.1.1, Emacs version lower than v24.4 is DROPPED.
 * Why
-- Full package upgrade never breaks Emacs setup
+- The only way to got a setup never breaks
 - 15 seconds to install 115 packages
 - The repository could be hosted on USB/Dropbox/GitHub, so you can install packages behind corp firewall
 - Tested with Emacs 23.4, Emacs 24.3, Emacs 24.4, Emacs 24.5 on OSX/Cygwin/Windows/Linux
@@ -21,6 +23,8 @@ Please note console command *tar* and *cp* is required.
 #+END_SRC
 
 If you use native Windows Emacs, you need install Cygwin or MSYS2.
+
+Installation is optional, you can runing =elpa-mirror.el= directly as a independent script. Check the section "Tips".
 * Usage
 =M-x elpamr-create-mirror-for-installed= to create local repository.
 
