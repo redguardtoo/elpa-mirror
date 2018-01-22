@@ -10,7 +10,7 @@ Please note:
 - CLI program *tar* and *cp* is required.
 - Since v2.1.1, Emacs version lower than v24.4 is DROPPED.
 * Why
-- The only way to got a setup never breaks
+- The only way to get a setup never breaks
 - 15 seconds to install 115 packages
 - The repository could be hosted on USB/Dropbox/GitHub, so you can install packages behind corp firewall
 - Tested with Emacs v24.4, v24.5, v25.3, v26, v27 on OSX/Cygwin/Windows/Linux
@@ -24,7 +24,7 @@ Please note:
 
 If you use native Windows Emacs, you need install Cygwin or MSYS2.
 
-Installation is optional, you can runing =elpa-mirror.el= directly as a independent script. Check the section "Tips".
+Installation is optional, you can running =elpa-mirror.el= directly as a independent script. Check the section "Tips".
 * Usage
 =M-x elpamr-create-mirror-for-installed= to create local repository.
 
@@ -33,6 +33,8 @@ To use the repository. Say it's "~/myelpa", insert below code into your ~/.emacs
 # myelpa is the ONLY repository now
 (setq package-archives '(("myelpa" . "~/myelpa")))
 #+END_SRC
+
+To update an existing local repository after installing new packages from elsewhere, simply rerun the =M-x elpamr-create-mirror-for-installed= command again.
 * Tips
 ** Change output directory,
 #+BEGIN_SRC elisp
