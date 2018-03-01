@@ -40,7 +40,7 @@
 ;;         --eval='(elpamr-create-mirror-for-installed)
 ;;
 ;; Make Emacs use the repository created by elpa-mirror,
-;;   - Insert `(setq package-archives '(("myelpa" . "~/myelpa")))` into ~/.emacs
+;;   - Insert `(setq package-archives '(("myelpa" . "~/myelpa/")))` into ~/.emacs
 ;;   - Restart Emacs
 ;;
 ;; You can also setup repositories on Dropbox and Github.

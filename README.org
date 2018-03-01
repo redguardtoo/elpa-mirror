@@ -26,10 +26,10 @@ If you use native Windows Emacs, you need install Cygwin or MSYS2.
 * Usage
 =M-x elpamr-create-mirror-for-installed= to create local repository.
 
-To use the repository. Say it's "~/myelpa", insert below code into your ~/.emacs,
+To use the repository. Say it's "~/myelpa", insert below code into your =~/.emacs=,
 #+BEGIN_SRC sh
-# myelpa is the ONLY repository now
-(setq package-archives '(("myelpa" . "~/myelpa")))
+# myelpa is the ONLY repository now, dont forget trailing slash in the directory
+(setq package-archives '(("myelpa" . "~/myelpa/")))
 #+END_SRC
 
 To update an existing local repository after installing new packages from elsewhere, simply rerun the =M-x elpamr-create-mirror-for-installed= command again.
