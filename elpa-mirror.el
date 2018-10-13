@@ -29,9 +29,20 @@
 
 ;;; Commentary:
 
+;; This program will create a local package repository by from all
+;; installed packages.
+;;
+;; Please note compile Emacs lisp file (*.elc) from one version of Emacs
+;; might not work with another version of Emacs. So you need this program
+;; to compile package from local repository.
+;;
+;; This is the ONLY way to 100% portable emacs setup.
+;;
 ;; Usage in Emacs,
 ;; `M-x elpamr-create-mirror-for-installed`
-;;  If you use native Windows Emacs, install Cygwin or MSYS2.
+;; It should works out of box on latest Window 10, Linux, macOS.
+;; If you use old Windows and native Windows Emacs, please install Cygwin
+;; or MSYS2.
 ;;
 ;; Usage in Shell,
 ;;   Emacs --batch -l ~/.emacs.d/init.el
@@ -39,7 +50,7 @@
 ;;         --eval='(setq elpamr-default-output-directory "~/myelpa")' \
 ;;         --eval='(elpamr-create-mirror-for-installed)
 ;;
-;; Make Emacs use the repository created by elpa-mirror,
+;; Use the repository created by elpa-mirror,
 ;;   - Insert `(setq package-archives '(("myelpa" . "~/myelpa/")))` into ~/.emacs
 ;;   - Restart Emacs
 ;;
@@ -56,7 +67,7 @@ If nil, you need provide one when `elpamr-create-mirror-for-installed'."
   :group 'elpa-mirror)
 
 (defcustom elpamr-exclude-packages nil
-  "Nameos of excluded packages"
+  "Names of excluded packages"
   :type '(repeat string)
   :group 'elpa-mirror)
 
@@ -139,19 +150,19 @@ If NO-CONVERTION is t,  it's UNIX path."
                             t))
 
 (defun elpamr--get-dependency (item)
-  "Get ITEM's dependency."
+  "Get ITEM dependency."
   (package-desc-reqs (elpamr--package-desc item)))
 
 (defun elpamr--get-version (item)
-  "Get ITEM's version."
+  "Get ITEM version."
   (package-desc-version (elpamr--package-desc item)))
 
 (defun elpamr--get-summary (item)
-  "Get ITEM's description."
+  "Get ITEM description."
   (package-desc-summary (elpamr--package-desc item)))
 
 (defun elpamr--one-item-for-archive-contents (final-pkg)
-  "Format FINAL-PKG's information into a string for archive-contents."
+  "Format FINAL-PKG information into a string for archive-contents."
   (let* ((a (elpamr--package-desc final-pkg)))
     (format " (%s . [%S %S \"%s\" tar])\n"
             (car final-pkg)

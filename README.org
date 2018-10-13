@@ -10,7 +10,7 @@ Please note:
 - CLI program *tar* and *cp* is required
 - Since v2.1.1, only *Emacs 24.4* and higher versions are  supported
 * Why
-- The only way to get a setup never breaks
+- Only way to get a setup never breaks because Emacs Lisp compile file (*.elc) from one version of Emacs might not be compatible with other version of Emacs
 - 15 seconds to install 115 packages
 - The repository could be hosted on USB/Dropbox/GitHub, so you can install packages behind corp firewall
 - Tested with Emacs v24.4, v24.5, v25.3, v26, v27 on OSX/Cygwin/Windows/Linux
@@ -23,6 +23,8 @@ Please note:
 #+END_SRC
 
 If you use native Windows Emacs, you need install Cygwin or MSYS2.
+
+Installation is optional, you can running =elpa-mirror.el= directly as a independent script. Check the section "Tips".
 * Usage
 =M-x elpamr-create-mirror-for-installed= to create local repository.
 
