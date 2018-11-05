@@ -7,7 +7,7 @@ Create local Emacs package repository so package upgrade never breaks.
 Only *installed* packages will be packaged into the local repository.
 
 Please note:
-- CLI program *tar* and *cp* is required
+- CLI program *tar* is required
 - Since v2.1.1, only *Emacs 24.4* and higher versions are  supported
 * Why
 - Only way to get a setup never breaks because Emacs Lisp compile file (*.elc) from one version of Emacs might not be compatible with other version of Emacs
