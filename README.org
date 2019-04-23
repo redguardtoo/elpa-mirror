@@ -2,53 +2,46 @@
 
 [[http://melpa.org/#/elpa-mirror][file:http://melpa.org/packages/elpa-mirror-badge.svg]] [[http://stable.melpa.org/#/elpa-mirror][file:http://stable.melpa.org/packages/elpa-mirror-badge.svg]]
 
-Create local Emacs package repository so package upgrade never breaks.
-
-Only *installed* packages will be packaged into the local repository.
+Create local Emacs package repository from *installed packages* so package upgrade never breaks.
 
 Please note:
-- CLI program *tar* is required
-- Since v2.1.1, only *Emacs 24.4* and higher versions are  supported
+- *CLI program tar is required*. It's bundled with Linux and macOS. On Windows, easiest way to get =tar= is installing [[https://www.cygwin.com/][Cygwin]] or [[https://www.msys2.org/][MSYS2]].
+- Since v2.1.1, only Emacs 24.4 and higher versions are supported
 * Why
-- Only way to get a setup never breaks because Emacs Lisp compile file (*.elc) from one version of Emacs might not be compatible with other version of Emacs
-- 15 seconds to install 115 packages
-- The repository could be hosted on USB/Dropbox/GitHub, so you can install packages behind corp firewall
+- Emacs Lisp compile file (*.elc) is not portable for different versions of Emacs. So =emacs.d= copied from higher version of Emacs might crash in lower version of Emacs
+- Package installation is fast. 15 seconds to install 115 packages
+- The repository could be hosted on USB/Dropbox/GitHub. So you can install packages behind corp firewall
 - Tested with Emacs v24.4, v24.5, v25.3, v26, v27 on OSX/Cygwin/Windows/Linux
 * Install
-- Download elpa-mirror.el to somewhere (say "~/.emacs.d/site-lisp/elpa-mirror")
+- Download =elpa-mirror.el= to somewhere (say =~/.emacs.d/site-lisp/elpa-mirror/=)
 - Add below code into your ~/.emacs,
 #+BEGIN_SRC elisp
 (add-to-list 'load-path "~/.emacs.d/site-lisp/elpa-mirror")
 (require 'elpa-mirror)
 #+END_SRC
 
-If you use native Windows Emacs, you need install Cygwin or MSYS2.
-
-Installation is optional, you can running =elpa-mirror.el= directly as a independent script. Check the section "Tips".
 * Usage
 =M-x elpamr-create-mirror-for-installed= to create local repository.
 
-To use the repository. Say it's "~/myelpa", insert below code into your =~/.emacs=,
+To use the repository =~/myelpa/=, insert below code into your =~/.emacs=,
 #+BEGIN_SRC sh
 # myelpa is the ONLY repository now, dont forget trailing slash in the directory
 (setq package-archives '(("myelpa" . "~/myelpa/")))
 #+END_SRC
 
-To update an existing local repository after installing new packages from elsewhere, simply rerun the =M-x elpamr-create-mirror-for-installed= command again.
+To update existing local repository, run =M-x elpamr-create-mirror-for-installed= again.
 
-BTW, you can run =elpa-mirror.el= as a independent script out of Emacs. Check "Create repository in Shell" in "Tips" section.
+BTW, you can run =elpa-mirror.el= as a independent script,
+#+begin_src bash
+mkdir -p ~/myelpa && emacs --batch -l ~/.emacs.d/init.el -l ~/any-directory-you-prefer/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
+#+end_src
 * Tips
 ** Change output directory,
 #+BEGIN_SRC elisp
 (setq elpamr-default-output-directory "~/myelpa")
 #+END_SRC
-** Create repository in Shell
-You don't need install =elpa-mirror= if running it in shell,
-#+begin_src bash
-mkdir -p ~/myelpa && emacs --batch -l ~/.emacs.d/init.el -l ~/any-directory-you-prefer/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
-#+end_src
 ** Repository on Dropbox
-Insert below code into .emacs:
+Insert below code into =~/.emacs=:
 #+BEGIN_SRC elisp
 ;; all-to-list will not override default elpa.
 ;; So now you have two repositories.
@@ -59,11 +52,11 @@ Insert below code into .emacs:
 ** Repository on GitHub
 My repository is [[https://github.com/redguardtoo/myelpa]].
 
-Insert below code into .emacs:
+Insert below code into =.emacs=:
 #+BEGIN_SRC elisp
 (add-to-list 'package-archives
              '("myelpa" . "https://raw.githubusercontent.com/redguardtoo/myelpa/master/"))
 #+END_SRC
 * Report bug
-- Insert =(setq elpamr-debug t)= into ~/.emacs
+- Insert =(setq elpamr-debug t)= into =.emacs=
 - Reproduce bug and report at [[https://github.com/redguardtoo/elpa-mirror]]

@@ -1,4 +1,4 @@
-;;; elpa-mirror.el --- Create local package repository so package upgrade never breaks
+;;; elpa-mirror.el --- Create local package repository from installed packages
 
 ;; Copyright (C) 2014-2017 Chen Bin
 
@@ -32,17 +32,16 @@
 ;; This program will create a local package repository by from all
 ;; installed packages.
 ;;
-;; Please note compile Emacs lisp file (*.elc) from one version of Emacs
-;; might not work with another version of Emacs. So you need this program
+;; Please note compile Emacs Lisp file (*.elc) from one version of Emacs
+;; might not work with another version of Emacs.  So you need this program
 ;; to compile package from local repository.
 ;;
-;; This is the ONLY way to 100% portable emacs setup.
+;; This is the ONLY way to 100% portable Emacs setup.
 ;;
 ;; Usage in Emacs,
-;; `M-x elpamr-create-mirror-for-installed`
-;; It should works out of box on latest Window 10, Linux, macOS.
-;; If you use old Windows and native Windows Emacs, please install Cygwin
-;; or MSYS2.
+;; Run `elpamr-create-mirror-for-installed'.
+;; CLI program tar is required.  It's already installed on Windows10/Linux/macOS.
+;; On old window, the easiest way to get tar is installing Cygwin/MSYS2.
 ;;
 ;; Usage in Shell,
 ;;   Emacs --batch -l ~/.emacs.d/init.el
@@ -67,7 +66,7 @@ If nil, you need provide one when `elpamr-create-mirror-for-installed'."
   :group 'elpa-mirror)
 
 (defcustom elpamr-exclude-packages nil
-  "Names of excluded packages"
+  "Names of excluded packages."
   :type '(repeat string)
   :group 'elpa-mirror)
 
@@ -117,13 +116,12 @@ Return `(list package-name integer-version-number)' or nil."
             (elpamr--win-executable-find "c" ":\\\\cygwin\\\\bin\\\\" exe)
             (elpamr--win-executable-find "d" ":\\\\cygwin\\\\bin\\\\" exe)
             (elpamr--win-executable-find "e" ":\\\\cygwin\\\\bin\\\\" exe)
+            (elpamr--win-executable-find "f" ":\\\\cygwin\\\\bin\\\\" exe)
             ;; msys2
             (elpamr--win-executable-find "c" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)
             (elpamr--win-executable-find "d" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)
             (elpamr--win-executable-find "e" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "c" ":\\\\msys32\\\\usr\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "d" ":\\\\msys32\\\\usr\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "e" ":\\\\msys32\\\\usr\\\\bin\\\\" exe)))
+            (elpamr--win-executable-find "f" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)))
       ;; *nix
       (executable-find exe)
       ;; well, `executable-find' failed
