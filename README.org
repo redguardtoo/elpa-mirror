@@ -4,9 +4,11 @@
 
 Create local Emacs package repository from *installed packages* so package upgrade never breaks.
 
-Please note:
-- *CLI program tar is required*. It's bundled with Linux and macOS. On Windows, easiest way to get =tar= is installing [[https://www.cygwin.com/][Cygwin]] or [[https://www.msys2.org/][MSYS2]].
-- Since v2.1.1, only Emacs 24.4 and higher versions are supported
+CLI program tar is required. It's bundled with Linux, macOS, and Windows 10.
+
+Please note if you are using Window 7 or older Windows 10 (less than build 17063) , you can still get =tar= by installing [[https://www.cygwin.com/][Cygwin]] or [[https://www.msys2.org/][MSYS2]].
+
+Since v2.1.1, only Emacs 24.4 and higher versions are supported.
 * Why
 - Emacs Lisp compile file (*.elc) is not portable for different versions of Emacs. So =emacs.d= copied from higher version of Emacs might crash in lower version of Emacs
 - Package installation is fast. 15 seconds to install 115 packages

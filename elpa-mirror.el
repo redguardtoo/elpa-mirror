@@ -6,7 +6,7 @@
 ;; URL: http://github.com/redguardtoo/elpa-mirror
 ;; Package-Requires: ((emacs "24.4"))
 ;; Version: 2.1.1
-;; Keywords: cloud mirror elpa
+;; Keywords: maint tools
 ;;
 ;; This file is not part of GNU Emacs.
 
@@ -36,7 +36,7 @@
 ;; might not work with another version of Emacs.  So you need this program
 ;; to compile package from local repository.
 ;;
-;; This is the ONLY way to 100% portable Emacs setup.
+;; This is the ONLY way to have 100% portable Emacs setup.
 ;;
 ;; Usage in Emacs,
 ;; Run `elpamr-create-mirror-for-installed'.
@@ -54,14 +54,13 @@
 ;;   - Restart Emacs
 ;;
 ;; You can also setup repositories on Dropbox and Github.
-;; See https://github.com/redguardtoo/elpa-mirror for HOW.
+;; See https://github.com/redguardtoo/elpa-mirror for details.
 
 ;;; Code:
 (require 'package)
 
 (defcustom elpamr-default-output-directory nil
-  "The output directory.
-If nil, you need provide one when `elpamr-create-mirror-for-installed'."
+  "The output directory use by `elpamr-create-mirror-for-installed'."
   :type '(choice directory (const :tags "None" nil))
   :group 'elpa-mirror)
 
@@ -88,22 +87,21 @@ The hook function have one argument: output-directory."
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "Access PKG extracted from `package-alist' directly."
-  (unless (member (symbol-name (car pkg))elpamr-exclude-packages)
+  (unless (member (symbol-name (car pkg)) elpamr-exclude-packages)
     pkg))
 
 (defun elpamr--extract-info-from-dir (dirname)
   "Extract information from DIRNAME.
 Return `(list package-name integer-version-number)' or nil."
   (interactive)
-  (if (string-match "\\(.*\\)-\\([0-9.]+\\)$" dirname)
-      ;; (list name version)
-      (list (match-string 1 dirname)
-            (split-string (match-string 2 dirname) "\\."))))
+  (when (string-match "\\(.*\\)-\\([0-9.]+\\)$" dirname)
+    (list (match-string 1 dirname)
+          (split-string (match-string 2 dirname) "\\."))))
 
 (defun elpamr--win-executable-find (driver path exe)
   "GNU Find executable with DRIVER/PATH/EXE information provided."
-  (if (executable-find (concat driver path exe))
-      (concat driver path exe)))
+  (when (executable-find (concat driver path exe))
+    (concat driver path exe)))
 
 (defun elpamr--executable-find (exe)
   "GNU Find EXE on Windows."
@@ -113,10 +111,7 @@ Return `(list package-name integer-version-number)' or nil."
             (elpamr--win-executable-find "c" ":\\\\cygwin64\\\\bin\\\\" exe)
             (elpamr--win-executable-find "d" ":\\\\cygwin64\\\\bin\\\\" exe)
             (elpamr--win-executable-find "e" ":\\\\cygwin64\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "c" ":\\\\cygwin\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "d" ":\\\\cygwin\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "e" ":\\\\cygwin\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "f" ":\\\\cygwin\\\\bin\\\\" exe)
+            (elpamr--win-executable-find "f" ":\\\\cygwin64\\\\bin\\\\" exe)
             ;; msys2
             (elpamr--win-executable-find "c" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)
             (elpamr--win-executable-find "d" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)
@@ -130,14 +125,15 @@ Return `(list package-name integer-version-number)' or nil."
 (defun elpamr--fullpath (parent file &optional no-convertion)
   "Full path of 'PARENT/FILE'.
 If NO-CONVERTION is t,  it's UNIX path."
-  (let* ((rlt (file-truename (concat (file-name-as-directory parent) file))))
-    (if (and (eq system-type 'windows-nt) (not no-convertion))
-        (let* ((cyg-cmd (format "%s -u \"%s\""
-                                (elpamr--executable-find "cygpath")
-                                rlt)))
-          (setq rlt (replace-regexp-in-string "[\r\n]+"
-                                              ""
-                                              (shell-command-to-string cyg-cmd)))))
+  (let* ((rlt (file-truename (concat (file-name-as-directory parent) file)))
+         cmd)
+    (when (and (eq system-type 'windows-nt) (not no-convertion))
+      (setq cmd (format "%s -u \"%s\""
+                            (elpamr--executable-find "cygpath")
+                            rlt))
+      (setq rlt (replace-regexp-in-string "[\r\n]+"
+                                          ""
+                                          (shell-command-to-string cmd))))
     (if elpamr-debug (message "elpamr--fullpath called => %s" rlt))
     rlt))
 
@@ -161,12 +157,11 @@ If NO-CONVERTION is t,  it's UNIX path."
 
 (defun elpamr--one-item-for-archive-contents (final-pkg)
   "Format FINAL-PKG information into a string for archive-contents."
-  (let* ((a (elpamr--package-desc final-pkg)))
-    (format " (%s . [%S %S \"%s\" tar])\n"
-            (car final-pkg)
-            (elpamr--get-version final-pkg)
-            (elpamr--get-dependency final-pkg)
-            (elpamr--clean-package-description (elpamr--get-summary final-pkg)))))
+  (format " (%s . [%S %S \"%s\" tar])\n"
+          (car final-pkg)
+          (elpamr--get-version final-pkg)
+          (elpamr--get-dependency final-pkg)
+          (elpamr--clean-package-description (elpamr--get-summary final-pkg))))
 
 ;;;###autoload
 (defun elpamr-version ()
@@ -176,7 +171,7 @@ If NO-CONVERTION is t,  it's UNIX path."
 
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed (&optional output-directory recreate-directory)
-  "Export INSTALLED packages into a new directory.
+  "Export installed packages into a new directory.
 Create the html files for the mirror site.
 
 The first valid directory found from the below list
@@ -190,11 +185,9 @@ will be deleted and recreated."
   (interactive)
   (let* (item
          final-pkg-list
-         pkg-info
          tar-cmd
          ;; package-user-dir is ~/.emacs.d/elpa by default
          (dirs (directory-files package-user-dir))
-         (len (length dirs))
          (cnt 0))
     ;; quoted from manual:
     ;;   Alist of all packages available for activation.
@@ -221,7 +214,7 @@ will be deleted and recreated."
       (message "Re-create %s" output-directory)
       (delete-directory output-directory t))
 
-    ;; Create output directory if it is not exist.
+    ;; Create output directory if it does not exist.
     (unless (file-directory-p output-directory)
       (make-directory output-directory t))
 
@@ -231,9 +224,9 @@ will be deleted and recreated."
 
       (dolist (dir dirs)
         (unless (or (member dir '("archives" "." ".."))
-                    (not (setq pkg-info (elpamr--extract-info-from-dir dir))))
+                    (not (elpamr--extract-info-from-dir dir)))
           ;; create tar using GNU tar
-           ;; BSD tar need set environment variable COPYFILE_DISABLE
+          ;; BSD tar need set environment variable COPYFILE_DISABLE
           (setq tar-cmd (concat (if (elpamr--is-mac) "COPYFILE_DISABLE=\"\" " "")
                                 (elpamr--executable-find "tar")
                                 " cf "
@@ -248,7 +241,7 @@ will be deleted and recreated."
           (if elpamr-debug (message "tar-cmd=%s" tar-cmd))
           (shell-command tar-cmd)
           (setq cnt (1+ cnt))
-          (message "Creating *.tar ... %d%%" (/ (* cnt 100) len))))
+          (message "Creating *.tar ... %d%%" (/ (* cnt 100) (length dirs)))))
 
       ;; output archive-contents
       (with-temp-buffer
