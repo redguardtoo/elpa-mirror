@@ -17,48 +17,48 @@ Since v2.1.1, only Emacs 24.4 and higher versions are supported.
 * Install
 - Download =elpa-mirror.el= to somewhere (say =~/.emacs.d/site-lisp/elpa-mirror/=)
 - Add below code into your ~/.emacs,
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (add-to-list 'load-path "~/.emacs.d/site-lisp/elpa-mirror")
 (require 'elpa-mirror)
-#+END_SRC
+#+end_src
 
 * Usage
 =M-x elpamr-create-mirror-for-installed= to create local repository.
 
 To use the repository =~/myelpa/=, insert below code into your =~/.emacs=,
-#+BEGIN_SRC sh
-# myelpa is the ONLY repository now, dont forget trailing slash in the directory
+#+begin_src elisp
+;; myelpa is the ONLY repository now, dont forget trailing slash in the directory
 (setq package-archives '(("myelpa" . "~/myelpa/")))
-#+END_SRC
+#+end_src
 
 To update existing local repository, run =M-x elpamr-create-mirror-for-installed= again.
 
 BTW, you can run =elpa-mirror.el= as a independent script,
-#+begin_src bash
+#+begin_src sh
 mkdir -p ~/myelpa && emacs --batch -l ~/.emacs.d/init.el -l ~/any-directory-you-prefer/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
 #+end_src
 * Tips
 ** Change output directory,
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (setq elpamr-default-output-directory "~/myelpa")
-#+END_SRC
+#+end_src
 ** Repository on Dropbox
 Insert below code into =~/.emacs=:
-#+BEGIN_SRC elisp
+#+begin_src elisp
 ;; all-to-list will not override default elpa.
 ;; So now you have two repositories.
 ;; One is GNU elpa. Another is myelpa
 (add-to-list 'package-archives
              '("myelpa" . "https://dl.dropboxusercontent.com/u/858862/myelpa/"))
-#+END_SRC
+#+end_src
 ** Repository on GitHub
 My repository is [[https://github.com/redguardtoo/myelpa]].
 
 Insert below code into =.emacs=:
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (add-to-list 'package-archives
              '("myelpa" . "https://raw.githubusercontent.com/redguardtoo/myelpa/master/"))
-#+END_SRC
+#+end_src
 * Report bug
 - Insert =(setq elpamr-debug t)= into =.emacs=
 - Reproduce bug and report at [[https://github.com/redguardtoo/elpa-mirror]]

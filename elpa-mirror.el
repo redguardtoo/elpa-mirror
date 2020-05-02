@@ -1,12 +1,12 @@
 ;;; elpa-mirror.el --- Create local package repository from installed packages
 
-;; Copyright (C) 2014-2017 Chen Bin
+;; Copyright (C) 2014-2020 Chen Bin
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
 ;; Package-Requires: ((emacs "24.4"))
 ;; Version: 2.1.1
-;; Keywords: maint tools
+;; Keywords: tools
 ;;
 ;; This file is not part of GNU Emacs.
 
