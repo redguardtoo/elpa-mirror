@@ -1,4 +1,4 @@
-* elpa-mirror (v2.1.1)
+* elpa-mirror
 
 [[http://melpa.org/#/elpa-mirror][file:http://melpa.org/packages/elpa-mirror-badge.svg]] [[http://stable.melpa.org/#/elpa-mirror][file:http://stable.melpa.org/packages/elpa-mirror-badge.svg]]
 
