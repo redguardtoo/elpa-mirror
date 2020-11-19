@@ -5,7 +5,7 @@
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
 ;; Package-Requires: ((emacs "24.4"))
-;; Version: 2.1.1
+;; Version: 2.1.2
 ;; Keywords: tools
 ;;
 ;; This file is not part of GNU Emacs.
@@ -167,7 +167,7 @@ If NO-CONVERTION is t,  it's UNIX path."
 (defun elpamr-version ()
   "Current version."
   (interactive)
-  (message "2.1.1"))
+  (message "2.1.2"))
 
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed (&optional output-directory recreate-directory)
@@ -232,6 +232,13 @@ will be deleted and recreated."
                                 " cf "
                                 (elpamr--fullpath output-directory dir)
                                 ".tar --exclude=\"*.elc\" --exclude=\"*~\" "
+                                ;; tar 1.14 NEWS,
+                                ;; @see https://git.savannah.gnu.org/cgit/tar.git/plain/NEWS?id=release_1_14
+                                ;; * New option --format allows to select the output archive format
+                                ;; * The default output format can be selected at configuration time
+                                ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
+                                ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
+                                (if (elpamr--is-mac) "" " --format=gnu ")
                                 " -C "
                                 package-user-dir
                                 " "
