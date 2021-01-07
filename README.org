@@ -12,7 +12,7 @@ Please note if you are using Window 7 or older Windows 10 (less than build 17063
 - Emacs Lisp compile file (*.elc) is not portable for different versions of Emacs. So =emacs.d= copied from higher version of Emacs might crash in lower version of Emacs
 - Package installation is fast. 15 seconds to install 115 packages
 - The repository could be hosted on USB/Dropbox/GitHub. So you can install packages behind corp firewall
-- Tested with Emacs v24.4, v24.5, v25.3, v26, v27 on OSX/Cygwin/Windows/Linux
+- Tested with Emacs 25, 26, 27 on OSX/Cygwin/Windows/Linux
 * Install
 - Download =elpa-mirror.el= to somewhere (say =~/.emacs.d/site-lisp/elpa-mirror/=)
 - Add below code into your ~/.emacs,

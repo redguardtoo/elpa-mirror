@@ -4,8 +4,8 @@
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
-;; Package-Requires: ((emacs "24.4"))
-;; Version: 2.1.2
+;; Package-Requires: ((emacs "25.1"))
+;; Version: 2.1.3
 ;; Keywords: tools
 ;;
 ;; This file is not part of GNU Emacs.
@@ -167,7 +167,7 @@ If NO-CONVERTION is t,  it's UNIX path."
 (defun elpamr-version ()
   "Current version."
   (interactive)
-  (message "2.1.2"))
+  (message "2.1.3"))
 
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed (&optional output-directory recreate-directory)
@@ -189,6 +189,11 @@ will be deleted and recreated."
          ;; package-user-dir is ~/.emacs.d/elpa by default
          (dirs (directory-files package-user-dir))
          (cnt 0))
+
+    ;; Since Emacs 27, `package-initialize' is optional.
+    ;; but we still need it to initialize `package-alist'.
+    (unless package-alist (package-initialize))
+
     ;; quoted from manual:
     ;;   Alist of all packages available for activation.
     ;;   Each element has the form (PKG . DESCS), where PKG is a package
