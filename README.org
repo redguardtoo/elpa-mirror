@@ -37,6 +37,10 @@ BTW, you can run =elpa-mirror.el= as a independent script,
 mkdir -p ~/myelpa && emacs --batch -l ~/.emacs.d/init.el -l ~/any-directory-you-prefer/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
 #+end_src
 * Tips
+** Exclude packages
+See =elpamr-exclude-packages=.
+** Exclude files/directories in package directory
+See =elpamr-tar-command-exclude-patterns=.
 ** Change output directory,
 #+begin_src elisp
 (setq elpamr-default-output-directory "~/myelpa")

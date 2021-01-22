@@ -5,7 +5,7 @@
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
 ;; Package-Requires: ((emacs "25.1"))
-;; Version: 2.1.3
+;; Version: 2.1.4
 ;; Keywords: tools
 ;;
 ;; This file is not part of GNU Emacs.
@@ -53,8 +53,12 @@
 ;;   - Insert `(setq package-archives '(("myelpa" . "~/myelpa/")))` into ~/.emacs
 ;;   - Restart Emacs
 ;;
-;; You can also setup repositories on Dropbox and Github.
-;; See https://github.com/redguardtoo/elpa-mirror for details.
+;; Tips,
+;;   - `elpamr-exclude-packages' exclude packages
+;;   - `elpamr-tar-command-exclude-patterns' excludes file and directories in
+;;   package directory.
+;;   - You can also setup repositories on Dropbox and Github.
+;;   See https://github.com/redguardtoo/elpa-mirror for details.
 
 ;;; Code:
 (require 'package)
@@ -66,6 +70,19 @@
 
 (defcustom elpamr-exclude-packages nil
   "Names of excluded packages."
+  :type '(repeat string)
+  :group 'elpa-mirror)
+
+(defcustom elpamr-tar-command-exclude-patterns
+  '("*.elc"
+    "*~"
+    "*.so"
+    "*.dylib"
+    "*.dll"
+    "*/bin/")
+  "Exclude glob patterns passed to tar command's \"--exclude\" option.
+\"company-*/bin/\" matches \"bin\" sub-directory of package company.
+\"*/bin/*\" matches any file in \"bin\" sub-directory of any package."
   :type '(repeat string)
   :group 'elpa-mirror)
 
@@ -167,7 +184,7 @@ If NO-CONVERTION is t,  it's UNIX path."
 (defun elpamr-version ()
   "Current version."
   (interactive)
-  (message "2.1.3"))
+  (message "2.1.4"))
 
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed (&optional output-directory recreate-directory)
@@ -188,6 +205,11 @@ will be deleted and recreated."
          tar-cmd
          ;; package-user-dir is ~/.emacs.d/elpa by default
          (dirs (directory-files package-user-dir))
+         (exclude-opts (concat " "
+                               (mapconcat (lambda (s) (format "--exclude=\"%s\"" s))
+                                          elpamr-tar-command-exclude-patterns
+                                          " ")
+                               " "))
          (cnt 0))
 
     ;; Since Emacs 27, `package-initialize' is optional.
@@ -232,22 +254,24 @@ will be deleted and recreated."
                     (not (elpamr--extract-info-from-dir dir)))
           ;; create tar using GNU tar
           ;; BSD tar need set environment variable COPYFILE_DISABLE
-          (setq tar-cmd (concat (if (elpamr--is-mac) "COPYFILE_DISABLE=\"\" " "")
-                                (elpamr--executable-find "tar")
-                                " cf "
-                                (elpamr--fullpath output-directory dir)
-                                ".tar --exclude=\"*.elc\" --exclude=\"*~\" "
-                                ;; tar 1.14 NEWS,
-                                ;; @see https://git.savannah.gnu.org/cgit/tar.git/plain/NEWS?id=release_1_14
-                                ;; * New option --format allows to select the output archive format
-                                ;; * The default output format can be selected at configuration time
-                                ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
-                                ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
-                                (if (elpamr--is-mac) "" " --format=gnu ")
-                                " -C "
-                                package-user-dir
-                                " "
-                                dir))
+          (setq tar-cmd
+                (concat (if (elpamr--is-mac) "COPYFILE_DISABLE=\"\" " "")
+                        (elpamr--executable-find "tar")
+                        " cf "
+                        (elpamr--fullpath output-directory dir)
+                        ".tar"
+                        exclude-opts
+                        ;; tar 1.14 NEWS,
+                        ;; @see https://git.savannah.gnu.org/cgit/tar.git/plain/NEWS?id=release_1_14
+                        ;; * New option --format allows to select the output archive format
+                        ;; * The default output format can be selected at configuration time
+                        ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
+                        ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
+                        (if (elpamr--is-mac) "" " --format=gnu ")
+                        " -C "
+                        package-user-dir
+                        " "
+                        dir))
 
           ;; for windows
           (if elpamr-debug (message "tar-cmd=%s" tar-cmd))
