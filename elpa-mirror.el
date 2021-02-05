@@ -99,8 +99,8 @@ The hook function have one argument: output-directory."
   (cadr item))
 
 (defun elpamr--is-mac ()
-  "Is macOS?"
-  (eq system-type 'darwin))
+  "Is bsd tar on mac?"
+  (string-match-p "^[ \t]*bsdtar" (shell-command-to-string "tar --version")))
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "Access PKG extracted from `package-alist' directly."
@@ -203,8 +203,8 @@ will be deleted and recreated."
   (let* (item
          final-pkg-list
          tar-cmd
-         ;; package-user-dir is ~/.emacs.d/elpa by default
-         (dirs (directory-files package-user-dir))
+         (pkg-dir (file-truename package-user-dir))
+         (dirs (directory-files pkg-dir))
          (exclude-opts (concat " "
                                (mapconcat (lambda (s) (format "--exclude=\"%s\"" s))
                                           elpamr-tar-command-exclude-patterns
@@ -269,7 +269,7 @@ will be deleted and recreated."
                         ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
                         (if (elpamr--is-mac) "" " --format=gnu ")
                         " -C "
-                        package-user-dir
+                        pkg-dir
                         " "
                         dir))
 
