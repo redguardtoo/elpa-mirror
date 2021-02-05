@@ -180,6 +180,38 @@ If NO-CONVERTION is t,  it's UNIX path."
           (elpamr--get-dependency final-pkg)
           (elpamr--clean-package-description (elpamr--get-summary final-pkg))))
 
+(defun elpamr--run-tar (working-dir out-file dir-to-archive)
+  "Run tar in order to archive DIR-TO-ARCHIVE into OUT-FILE.
+Paths are relative to WORKING-DIR."
+  (let* ((exclude-opts (concat " "
+                               (mapconcat (lambda (s) (format "--exclude=\"%s\"" s))
+                                          elpamr-tar-command-exclude-patterns
+                                          " ")
+                               " "))
+         ;; create tar using GNU tar
+         ;; BSD tar need set environment variable COPYFILE_DISABLE
+         (tar-cmd
+          (concat (if (elpamr--is-mac) "COPYFILE_DISABLE=\"\" " "")
+                  (elpamr--executable-find "tar")
+                  " cf "
+                  out-file
+                  exclude-opts
+                  ;; tar 1.14 NEWS,
+                  ;; @see https://git.savannah.gnu.org/cgit/tar.git/plain/NEWS?id=release_1_14
+                  ;; * New option --format allows to select the output archive format
+                  ;; * The default output format can be selected at configuration time
+                  ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
+                  ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
+                  (if (elpamr--is-mac) "" " --format=gnu ")
+                  " -C "
+                  working-dir
+                  " "
+                  dir-to-archive)))
+
+    ;; for windows
+    (if elpamr-debug (message "tar-cmd=%s" tar-cmd))
+    (shell-command tar-cmd)))
+
 ;;;###autoload
 (defun elpamr-version ()
   "Current version."
@@ -205,11 +237,6 @@ will be deleted and recreated."
          tar-cmd
          ;; package-user-dir is ~/.emacs.d/elpa by default
          (dirs (directory-files package-user-dir))
-         (exclude-opts (concat " "
-                               (mapconcat (lambda (s) (format "--exclude=\"%s\"" s))
-                                          elpamr-tar-command-exclude-patterns
-                                          " ")
-                               " "))
          (cnt 0))
 
     ;; Since Emacs 27, `package-initialize' is optional.
@@ -252,30 +279,9 @@ will be deleted and recreated."
       (dolist (dir dirs)
         (unless (or (member dir '("archives" "." ".."))
                     (not (elpamr--extract-info-from-dir dir)))
-          ;; create tar using GNU tar
-          ;; BSD tar need set environment variable COPYFILE_DISABLE
-          (setq tar-cmd
-                (concat (if (elpamr--is-mac) "COPYFILE_DISABLE=\"\" " "")
-                        (elpamr--executable-find "tar")
-                        " cf "
-                        (elpamr--fullpath output-directory dir)
-                        ".tar"
-                        exclude-opts
-                        ;; tar 1.14 NEWS,
-                        ;; @see https://git.savannah.gnu.org/cgit/tar.git/plain/NEWS?id=release_1_14
-                        ;; * New option --format allows to select the output archive format
-                        ;; * The default output format can be selected at configuration time
-                        ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
-                        ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
-                        (if (elpamr--is-mac) "" " --format=gnu ")
-                        " -C "
-                        package-user-dir
-                        " "
-                        dir))
-
-          ;; for windows
-          (if elpamr-debug (message "tar-cmd=%s" tar-cmd))
-          (shell-command tar-cmd)
+          (elpamr--run-tar package-user-dir
+                           (concat (elpamr--fullpath output-directory dir) ".tar")
+                           dir)
           (setq cnt (1+ cnt))
           (message "Creating *.tar ... %d%%" (/ (* cnt 100) (length dirs)))))
 
