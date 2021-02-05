@@ -183,34 +183,29 @@ If NO-CONVERTION is t,  it's UNIX path."
 (defun elpamr--run-tar (working-dir out-file dir-to-archive)
   "Run tar in order to archive DIR-TO-ARCHIVE into OUT-FILE.
 Paths are relative to WORKING-DIR."
-  (let* ((exclude-opts (concat " "
-                               (mapconcat (lambda (s) (format "--exclude=\"%s\"" s))
-                                          elpamr-tar-command-exclude-patterns
-                                          " ")
-                               " "))
+  (let* ((exclude-opts (mapcar (lambda (s) (concat "--exclude=" s))
+                               elpamr-tar-command-exclude-patterns))
          ;; create tar using GNU tar
+         (tar-args
+          `("cf" ,out-file
+            ,@exclude-opts
+            ;; tar 1.14 NEWS,
+            ;; @see https://git.savannah.gnu.org/cgit/tar.git/plain/NEWS?id=release_1_14
+            ;; * New option --format allows to select the output archive format
+            ;; * The default output format can be selected at configuration time
+            ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
+            ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
+            ,@(if (elpamr--is-mac) '("--format=gnu") nil)
+            "-C" ,working-dir
+            "--" ,dir-to-archive))
          ;; BSD tar need set environment variable COPYFILE_DISABLE
-         (tar-cmd
-          (concat (if (elpamr--is-mac) "COPYFILE_DISABLE=\"\" " "")
-                  (elpamr--executable-find "tar")
-                  " cf "
-                  out-file
-                  exclude-opts
-                  ;; tar 1.14 NEWS,
-                  ;; @see https://git.savannah.gnu.org/cgit/tar.git/plain/NEWS?id=release_1_14
-                  ;; * New option --format allows to select the output archive format
-                  ;; * The default output format can be selected at configuration time
-                  ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
-                  ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
-                  (if (elpamr--is-mac) "" " --format=gnu ")
-                  " -C "
-                  working-dir
-                  " "
-                  dir-to-archive)))
-
-    ;; for windows
-    (if elpamr-debug (message "tar-cmd=%s" tar-cmd))
-    (shell-command tar-cmd)))
+         (process-environment (if (elpamr--is-mac)
+                                  (cons "COPYFILE_DISABLE=" process-environment)
+                                process-environment)))
+    (apply #'call-process
+           (elpamr--executable-find "tar") nil
+           "*elpa-mirror tar output*" nil
+           tar-args)))
 
 ;;;###autoload
 (defun elpamr-version ()
