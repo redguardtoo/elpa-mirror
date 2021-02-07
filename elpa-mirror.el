@@ -238,14 +238,20 @@ will be deleted and recreated."
     ;; but we still need it to initialize `package-alist'.
     (unless package-alist (package-initialize))
 
-    ;; quoted from manual:
+    ;; Quote from manual about package-alist:
     ;;   Alist of all packages available for activation.
     ;;   Each element has the form (PKG . DESCS), where PKG is a package
     ;;   name (a symbol) and DESCS is a non-empty list of `package-desc' structure,
     ;;   sorted by decreasing versions.
-    (dolist (pkg package-alist)
-      (setq item (elpamr--create-one-item-for-archive-contents pkg))
-      (if item (push item final-pkg-list)))
+    ;; Sorted for reproducibility.
+    (setq final-pkg-list
+          (let ((sorted-package-alist
+                 (sort (copy-sequence package-alist)
+                       (lambda (a b)
+                         (string< (symbol-name (car a))
+                                  (symbol-name (car b)))))))
+            (delq nil (mapcar #'elpamr--create-one-item-for-archive-contents
+                              sorted-package-alist))))
 
     ;; set output directory
     (setq output-directory
