@@ -196,6 +196,15 @@ Paths are relative to WORKING-DIR."
             ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
             ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
             ,@(unless (elpamr--is-mac) '("--format=gnu"))
+            ;; Improve reproducibility by not storing unnecessary metadata.
+            ;; These options are enough for archives in the GNU format, but if
+            ;; we ever switch to PAX, we'll need to add more (see
+            ;; <http://h2.jaguarpaw.co.uk/posts/reproducible-tar/> and
+            ;; <https://www.gnu.org/software/tar/manual/html_node/PAX-keywords.html>).
+            ,@(unless (elpamr--is-mac)
+                '("--sort=name"
+                  "--owner=root:0" "--group=root:0"
+                  "--mtime=1970-01-01 00:00:00 UTC"))
             "-C" ,working-dir
             "--" ,dir-to-archive))
          ;; BSD tar need set environment variable COPYFILE_DISABLE
