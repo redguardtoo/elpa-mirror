@@ -236,9 +236,7 @@ will be used as mirror package's output directory:
 When RECREATE-DIRECTORY is non-nil, OUTPUT-DIRECTORY
 will be deleted and recreated."
   (interactive)
-  (let* (item
-         final-pkg-list
-         tar-cmd
+  (let* (final-pkg-list
          (pkg-dir (file-truename package-user-dir))
          (dirs (directory-files pkg-dir))
          (cnt 0))
