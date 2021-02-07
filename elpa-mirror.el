@@ -86,6 +86,19 @@
   :type '(repeat string)
   :group 'elpa-mirror)
 
+(defcustom elpamr-tar-executable
+  "tar"
+  "The tar executable used by elpa-mirror.
+It can be BSD tar, but GNU tar is preferred."
+  :type 'string
+  :group 'elpa-mirror)
+
+(defcustom elpamr-cygpath-executable
+  "cygpath"
+  "The cygpath executable used by elpa-mirror (relevant on Windows only)."
+  :type 'string
+  :group 'elpa-mirror)
+
 (defcustom elpamr-finished-hook nil
   "Hook run when command `elpamr-create-mirror-for-installed' run finished.
 The hook function have one argument: output-directory."
@@ -98,9 +111,10 @@ The hook function have one argument: output-directory."
   "Extract package information from ITEM."
   (cadr item))
 
-(defun elpamr--is-mac ()
-  "Is bsd tar on mac?"
-  (string-match-p "^[ \t]*bsdtar" (shell-command-to-string "tar --version")))
+(defun elpamr--is-bsd-tar ()
+  "Are we using BSD tar instead of GNU tar?"
+  (let ((first-line (car (process-lines elpamr-tar-executable "--version"))))
+    (and first-line (string-match-p "^[ \t]*bsdtar" first-line))))
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "Access PKG extracted from `package-alist' directly."
@@ -115,38 +129,14 @@ Return `(list package-name integer-version-number)' or nil."
     (list (match-string 1 dirname)
           (split-string (match-string 2 dirname) "\\."))))
 
-(defun elpamr--win-executable-find (driver path exe)
-  "GNU Find executable with DRIVER/PATH/EXE information provided."
-  (when (executable-find (concat driver path exe))
-    (concat driver path exe)))
-
-(defun elpamr--executable-find (exe)
-  "GNU Find EXE on Windows."
-  (or (and (eq system-type 'windows-nt)
-           (or
-            ;; cygwin
-            (elpamr--win-executable-find "c" ":\\\\cygwin64\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "d" ":\\\\cygwin64\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "e" ":\\\\cygwin64\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "f" ":\\\\cygwin64\\\\bin\\\\" exe)
-            ;; msys2
-            (elpamr--win-executable-find "c" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "d" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "e" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)
-            (elpamr--win-executable-find "f" ":\\\\msys64\\\\usr\\\\bin\\\\" exe)))
-      ;; *nix
-      (executable-find exe)
-      ;; well, `executable-find' failed
-      exe))
-
 (defun elpamr--fullpath (parent file &optional no-convertion)
   "Full path of 'PARENT/FILE'.
-If NO-CONVERTION is t,  it's UNIX path."
+If NO-CONVERTION is t, it's a UNIX path."
   (let* ((rlt (file-truename (concat (file-name-as-directory parent) file)))
          cmd)
     (when (and (eq system-type 'windows-nt) (not no-convertion))
       (setq cmd (format "%s -u \"%s\""
-                            (elpamr--executable-find "cygpath")
+                            elpamr-cygpath-executable
                             rlt))
       (setq rlt (replace-regexp-in-string "[\r\n]+"
                                           ""
@@ -180,9 +170,13 @@ If NO-CONVERTION is t,  it's UNIX path."
           (elpamr--get-dependency final-pkg)
           (elpamr--clean-package-description (elpamr--get-summary final-pkg))))
 
-(defun elpamr--run-tar (working-dir out-file dir-to-archive)
+(defun elpamr--run-tar (working-dir out-file dir-to-archive is-bsd-tar)
   "Run tar in order to archive DIR-TO-ARCHIVE into OUT-FILE.
-Paths are relative to WORKING-DIR."
+Paths are relative to WORKING-DIR.
+IS-BSD-TAR should be non-nil if this function should use a
+command compatible with BSD tar instead of GNU tar."
+  ;; We could detect BSD tar inside this function easily, but detecting it once
+  ;; and then passing it as an argument improves performance.
   (let* ((exclude-opts (mapcar (lambda (s) (concat "--exclude=" s))
                                elpamr-tar-command-exclude-patterns))
          ;; create tar using GNU tar
@@ -195,24 +189,25 @@ Paths are relative to WORKING-DIR."
             ;; * The default output format can be selected at configuration time
             ;;   by presetting the environment variable DEFAULT_ARCHIVE_FORMAT.
             ;;   Allowed values are GNU, V7, OLDGNU and POSIX.
-            ,@(unless (elpamr--is-mac) '("--format=gnu"))
+            ,@(unless is-bsd-tar '("--format=gnu"))
             ;; Improve reproducibility by not storing unnecessary metadata.
             ;; These options are enough for archives in the GNU format, but if
             ;; we ever switch to PAX, we'll need to add more (see
             ;; <http://h2.jaguarpaw.co.uk/posts/reproducible-tar/> and
             ;; <https://www.gnu.org/software/tar/manual/html_node/PAX-keywords.html>).
-            ,@(unless (elpamr--is-mac)
+            ,@(unless is-bsd-tar
                 '("--sort=name"
                   "--owner=root:0" "--group=root:0"
                   "--mtime=1970-01-01 00:00:00 UTC"))
             "-C" ,working-dir
             "--" ,dir-to-archive))
-         ;; BSD tar need set environment variable COPYFILE_DISABLE
-         (process-environment (if (elpamr--is-mac)
+         ;; Don't archive macOS' file properties (see
+         ;; <https://superuser.com/q/259703>).
+         (process-environment (if (eq system-type 'darwin)
                                   (cons "COPYFILE_DISABLE=" process-environment)
                                 process-environment)))
     (apply #'call-process
-           (elpamr--executable-find "tar") nil
+           elpamr-tar-executable nil
            "*elpa-mirror tar output*" nil
            tar-args)))
 
@@ -236,10 +231,7 @@ will be used as mirror package's output directory:
 When RECREATE-DIRECTORY is non-nil, OUTPUT-DIRECTORY
 will be deleted and recreated."
   (interactive)
-  (let* (final-pkg-list
-         (pkg-dir (file-truename package-user-dir))
-         (dirs (directory-files pkg-dir))
-         (cnt 0))
+  (let (final-pkg-list)
 
     ;; Since Emacs 27, `package-initialize' is optional.
     ;; but we still need it to initialize `package-alist'.
@@ -284,14 +276,19 @@ will be deleted and recreated."
                output-directory
                (file-directory-p output-directory))
 
-      (dolist (dir dirs)
-        (unless (or (member dir '("archives" "." ".."))
-                    (not (elpamr--extract-info-from-dir dir)))
-          (elpamr--run-tar pkg-dir
-                           (concat (elpamr--fullpath output-directory dir) ".tar")
-                           dir)
-          (setq cnt (1+ cnt))
-          (message "Creating *.tar ... %d%%" (/ (* cnt 100) (length dirs)))))
+      (let* ((pkg-dir (file-truename package-user-dir))
+             (dirs (directory-files pkg-dir))
+             (is-bsd-tar (elpamr--is-bsd-tar))
+             (cnt 0))
+        (dolist (dir dirs)
+          (unless (or (member dir '("archives" "." ".."))
+                      (not (elpamr--extract-info-from-dir dir)))
+            (elpamr--run-tar pkg-dir
+                             (concat (elpamr--fullpath output-directory dir) ".tar")
+                             dir
+                             is-bsd-tar)
+            (setq cnt (1+ cnt))
+            (message "Creating *.tar ... %d%%" (/ (* cnt 100) (length dirs))))))
 
       ;; output archive-contents
       (with-temp-buffer
