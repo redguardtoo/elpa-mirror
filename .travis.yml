@@ -1,0 +1,16 @@
+language: nix
+
+os:
+  - linux
+
+env:
+  - EMACS_CI=emacs-26-3
+  - EMACS_CI=emacs-27-1
+  - EMACS_CI=emacs-snapshot
+
+install:
+  - bash <(curl https://raw.githubusercontent.com/purcell/nix-emacs-ci/master/travis-install)
+  - bash <(command -v bsdtar > /dev/null 2>&1 || nix-env -i libarchive)
+
+script:
+  - bash <(make test)
