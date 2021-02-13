@@ -105,7 +105,29 @@ The hook function have one argument: output-directory."
   :group 'elpa-mirror
   :type 'hook)
 
-(defvar elpamr-debug nil "Show debug message.")
+(defvar elpamr--log-buffer "*elpa-mirror log*"
+  "Destination buffer for log messages and command output.")
+
+(defun elpamr--log (format-string &rest args)
+  "Format ARGS with FORMAT-STRING, add the result to the log, and return it.
+The log line will be prepended with an asterisk to distinguish it
+from program output."
+  (let ((line (apply #'format format-string args)))
+    (with-current-buffer (get-buffer-create elpamr--log-buffer)
+      (insert "* " line "\n"))
+    line))
+
+(defun elpamr--log-message (format-string &rest args)
+  "Format ARGS with FORMAT-STRING, add the result to the log, and
+display it."
+  (apply #'elpamr--log format-string args)
+  (apply #'message format-string args))
+
+(defun elpamr--log-error (format-string &rest args)
+  "Format ARGS with FORMAT-STRING, add the result to the log, and
+signal an error."
+  (apply #'elpamr--log format-string args)
+  (apply #'error format-string args))
 
 (defun elpamr--package-desc (item)
   "Extract package information from ITEM."
@@ -113,8 +135,10 @@ The hook function have one argument: output-directory."
 
 (defun elpamr--is-bsd-tar ()
   "Are we using BSD tar instead of GNU tar?"
-  (let ((first-line (car (process-lines elpamr-tar-executable "--version"))))
-    (and first-line (string-match-p "^[ \t]*bsdtar" first-line))))
+  (let* ((first-line (car (process-lines elpamr-tar-executable "--version")))
+         (result (and first-line (string-match-p "^[ \t]*bsdtar" first-line))))
+    (elpamr--log "Detected tar variant: %s" (if result "BSD" "GNU"))
+    result))
 
 (defun elpamr--create-one-item-for-archive-contents (pkg)
   "Access PKG extracted from `package-alist' directly."
@@ -141,7 +165,7 @@ If NO-CONVERTION is t, it's a UNIX path."
       (setq rlt (replace-regexp-in-string "[\r\n]+"
                                           ""
                                           (shell-command-to-string cmd))))
-    (if elpamr-debug (message "elpamr--fullpath called => %s" rlt))
+    (elpamr--log "Converted to full path: %S %S -> %S" parent file rlt)
     rlt))
 
 (defun elpamr--clean-package-description (description)
@@ -169,6 +193,16 @@ If NO-CONVERTION is t, it's a UNIX path."
           (elpamr--get-version final-pkg)
           (elpamr--get-dependency final-pkg)
           (elpamr--clean-package-description (elpamr--get-summary final-pkg))))
+
+(defun elpamr--call-process-check (program &rest call-process-args)
+  "Call `call-process' with the arguments to this function.
+Log and signal an error if it exits with a non-zero status."
+  (let ((exit-status (apply #'call-process program call-process-args)))
+    (if (not (= exit-status 0))
+        (elpamr--log-error
+         "Program %s exited with non-zero status %s, see the %s buffer for details"
+         program exit-status elpamr--log-buffer)
+      exit-status)))
 
 (defun elpamr--run-tar (working-dir out-file dir-to-archive is-bsd-tar)
   "Run tar in order to archive DIR-TO-ARCHIVE into OUT-FILE.
@@ -206,9 +240,10 @@ command compatible with BSD tar instead of GNU tar."
          (process-environment (if (eq system-type 'darwin)
                                   (cons "COPYFILE_DISABLE=" process-environment)
                                 process-environment)))
-    (apply #'call-process
+    (elpamr--log "Running tar: %S %S" elpamr-tar-executable tar-args)
+    (apply #'elpamr--call-process-check
            elpamr-tar-executable nil
-           "*elpa-mirror tar output*" nil
+           elpamr--log-buffer nil
            tar-args)))
 
 ;;;###autoload
@@ -232,6 +267,10 @@ When RECREATE-DIRECTORY is non-nil, OUTPUT-DIRECTORY
 will be deleted and recreated."
   (interactive)
   (let (final-pkg-list)
+
+    ;; Erase the log (in case of multiple consecutive calls to this function).
+    (with-current-buffer (get-buffer-create elpamr--log-buffer)
+      (erase-buffer))
 
     ;; Since Emacs 27, `package-initialize' is optional.
     ;; but we still need it to initialize `package-alist'.
@@ -260,12 +299,12 @@ will be deleted and recreated."
                 ((and elpamr-default-output-directory
                       (stringp elpamr-default-output-directory))
                  (file-name-as-directory elpamr-default-output-directory))
-                (t (read-directory-name "Output directory:"))))
+                (t (read-directory-name "Output directory: "))))
 
     ;; Delete output directory if we need a clean output directory
     (when (and recreate-directory
                (file-directory-p output-directory))
-      (message "Re-create %s" output-directory)
+      (elpamr--log-message "Re-creating %s" output-directory)
       (delete-directory output-directory t))
 
     ;; Create output directory if it does not exist.
@@ -288,9 +327,12 @@ will be deleted and recreated."
                              dir
                              is-bsd-tar)
             (setq cnt (1+ cnt))
-            (message "Creating *.tar ... %d%%" (/ (* cnt 100) (length dirs))))))
+            (message "Creating *.tar... %2d%% (%s)"
+                     (/ (* cnt 100) (length dirs))
+                     dir))))
 
       ;; output archive-contents
+      (elpamr--log-message "Creating archive-contents...")
       (with-temp-buffer
         (let* ((print-level nil)
                (print-length nil))
@@ -302,7 +344,7 @@ will be deleted and recreated."
         (write-file (elpamr--fullpath output-directory
                                       "archive-contents" t)))
       (run-hook-with-args 'elpamr-finished-hook output-directory)
-      (message "DONE! Output into %s" output-directory))))
+      (elpamr--log-message "DONE! Output directory: %s" output-directory))))
 
 (provide 'elpa-mirror)
 ;;; elpa-mirror.el ends here
