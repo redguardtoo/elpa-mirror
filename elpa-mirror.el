@@ -153,20 +153,19 @@ Return `(list package-name integer-version-number)' or nil."
     (list (match-string 1 dirname)
           (split-string (match-string 2 dirname) "\\."))))
 
-(defun elpamr--fullpath (parent file &optional no-convertion)
+(defun elpamr--fullpath (parent file &optional no-cygpath)
   "Full path of 'PARENT/FILE'.
-If NO-CONVERTION is t, it's a UNIX path."
-  (let* ((rlt (file-truename (concat (file-name-as-directory parent) file)))
-         cmd)
-    (when (and (eq system-type 'windows-nt) (not no-convertion))
-      (setq cmd (format "%s -u \"%s\""
-                            elpamr-cygpath-executable
-                            rlt))
-      (setq rlt (replace-regexp-in-string "[\r\n]+"
-                                          ""
-                                          (shell-command-to-string cmd))))
-    (elpamr--log "Converted to full path: %S %S -> %S" parent file rlt)
-    rlt))
+If NO-CYGPATH is non-nil, don't convert the path with
+`cygpath' even if we're on Windows."
+  (let* ((result (file-truename (concat (file-name-as-directory parent) file))))
+    (when (and (eq system-type 'windows-nt) (not no-cygpath))
+      (let ((cygpath-args (list "-u" "--" result)))
+        (elpamr--log "Running cygpath: %S %S"
+                     elpamr-cygpath-executable cygpath-args)
+        (setq result (car (apply #'process-lines
+                                 elpamr-cygpath-executable cygpath-args)))))
+    (elpamr--log "Converted to full path: %S %S -> %S" parent file result)
+    result))
 
 (defun elpamr--clean-package-description (description)
   "Clean DESCRIPTION."
