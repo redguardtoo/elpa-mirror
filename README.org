@@ -63,5 +63,5 @@ Insert below code into =.emacs=:
              '("myelpa" . "https://raw.githubusercontent.com/redguardtoo/myelpa/master/"))
 #+end_src
 * Report bug
-- Insert =(setq elpamr-debug t)= into =.emacs=
-- Reproduce bug and report at [[https://github.com/redguardtoo/elpa-mirror]]
+
+Reproduce the bug, report it at [[https://github.com/redguardtoo/elpa-mirror]], and attach the contents of the =*elpa-mirror log*= buffer.
