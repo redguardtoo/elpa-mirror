@@ -79,7 +79,8 @@
     "*.so"
     "*.dylib"
     "*.dll"
-    "*/bin/")
+    "*/bin/"
+    "__pycache__")
   "Exclude glob patterns passed to tar command's \"--exclude\" option.
 \"company-*/bin/\" matches \"bin\" sub-directory of package company.
 \"*/bin/*\" matches any file in \"bin\" sub-directory of any package."
