@@ -80,10 +80,31 @@
     "*.dylib"
     "*.dll"
     "*/bin"
-    "__pycache__")
-  "Exclude glob patterns passed to tar command's \"--exclude\" option.
-\"company-*/bin\" matches \"bin\" directory/file of package company.
-\"*/bin/*\" matches any file in \"bin\" directory of any package."
+    "*/__pycache__")
+  "Exclude patterns passed tar's `--exclude' option.
+
+The patterns use shell glob syntax, not regexp syntax:
+
+* `*' matches any string, including `/'.
+* `?' matches a single character.
+* `[abc]' or `[a-z]' is a character class.
+* `[^a-z]' or `[!a-z]' is a negated character class.
+* `^' and `$' have a special meaning in BSD tar only.
+* Special characters are quoted with `\\'.
+
+The patterns are anchored, meaning that they always start
+matching at the start of the path. This is done by passing the
+`--anchored' option when running with GNU tar, or prepending `^'
+to every pattern when running with BSD tar.
+
+Examples:
+
+* Exclude files/directories that end with `.elc': `*.elc'.
+* Exclude files/directories named `__pycache__': `*/__pycache__'.
+* Exclude `bin' inside the `company' package: `company-*/bin'.
+
+Note that a slash at the start or the end of a pattern will cause
+it to match nothing."
   :type '(repeat string)
   :group 'elpa-mirror)
 
@@ -211,11 +232,13 @@ IS-BSD-TAR should be non-nil if this function should use a
 command compatible with BSD tar instead of GNU tar."
   ;; We could detect BSD tar inside this function easily, but detecting it once
   ;; and then passing it as an argument improves performance.
-  (let* ((exclude-opts (mapcar (lambda (s) (concat "--exclude=" s))
+  (let* ((exclude-opts (mapcar (lambda (s)
+                                 (concat "--exclude=" (if is-bsd-tar "^" "") s))
                                elpamr-tar-command-exclude-patterns))
          ;; create tar using GNU tar
          (tar-args
           `("cf" ,out-file
+            ,@(unless is-bsd-tar '("--anchored"))
             ,@exclude-opts
             ;; tar 1.14 NEWS,
             ;; @see https://git.savannah.gnu.org/cgit/tar.git/plain/NEWS?id=release_1_14
@@ -233,6 +256,11 @@ command compatible with BSD tar instead of GNU tar."
                 '("--sort=name"
                   "--owner=root:0" "--group=root:0"
                   "--mtime=1970-01-01 00:00:00 UTC"))
+            ;; It's important that tar starts in the package's parent directory
+            ;; (using the `-C' option) and gets passed just the name (not the
+            ;; full path) of the package's directory. This is because we want
+            ;; anchored exclude patterns like `company-*/bin' to do what the
+            ;; user expects.
             "-C" ,working-dir
             "--" ,dir-to-archive))
          ;; Don't archive macOS' file properties (see
