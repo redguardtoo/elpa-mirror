@@ -40,8 +40,8 @@
 ;;
 ;; Usage in Emacs,
 ;; Run `elpamr-create-mirror-for-installed'.
+;;
 ;; CLI program tar is required.  It's already installed on Windows10/Linux/macOS.
-;; On old window, the easiest way to get tar is installing Cygwin/MSYS2.
 ;;
 ;; Usage in Shell,
 ;;   Emacs --batch -l ~/.emacs.d/init.el
@@ -115,12 +115,6 @@ It can be BSD tar, but GNU tar is preferred."
   :type 'string
   :group 'elpa-mirror)
 
-(defcustom elpamr-cygpath-executable
-  "cygpath"
-  "The cygpath executable used by elpa-mirror (relevant on Windows only)."
-  :type 'string
-  :group 'elpa-mirror)
-
 (defcustom elpamr-finished-hook nil
   "Hook run when command `elpamr-create-mirror-for-installed' run finished.
 The hook function have one argument: output-directory."
@@ -175,17 +169,9 @@ Return `(list package-name integer-version-number)' or nil."
     (list (match-string 1 dirname)
           (split-string (match-string 2 dirname) "\\."))))
 
-(defun elpamr--fullpath (parent file &optional no-cygpath)
-  "Full path of 'PARENT/FILE'.
-If NO-CYGPATH is non-nil, don't convert the path with
-`cygpath' even if we're on Windows."
+(defun elpamr--fullpath (parent file)
+  "Full path of 'PARENT/FILE'."
   (let* ((result (file-truename (concat (file-name-as-directory parent) file))))
-    (when (and (eq system-type 'windows-nt) (not no-cygpath))
-      (let ((cygpath-args (list "-u" "--" result)))
-        (elpamr--log "Running cygpath: %S %S"
-                     elpamr-cygpath-executable cygpath-args)
-        (setq result (car (apply #'process-lines
-                                 elpamr-cygpath-executable cygpath-args)))))
     (elpamr--log "Converted to full path: %S %S -> %S" parent file result)
     result))
 
@@ -369,8 +355,7 @@ will be deleted and recreated."
             ;; each package occupies one line
             (insert (elpamr--one-item-for-archive-contents final-pkg)))
           (insert ")"))
-        (write-file (elpamr--fullpath output-directory
-                                      "archive-contents" t)))
+        (write-file (elpamr--fullpath output-directory "archive-contents")))
       (run-hook-with-args 'elpamr-finished-hook output-directory)
       (elpamr--log-message "DONE! Output directory: %s" output-directory))))
 
