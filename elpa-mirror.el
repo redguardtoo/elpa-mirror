@@ -5,7 +5,7 @@
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
 ;; Package-Requires: ((emacs "25.1"))
-;; Version: 2.1.4
+;; Version: 2.1.5
 ;; Keywords: tools
 ;;
 ;; This file is not part of GNU Emacs.
@@ -151,8 +151,8 @@ signal an error."
 
 (defun elpamr--is-bsd-tar ()
   "Are we using BSD tar instead of GNU tar?"
-  (let* ((first-line (car (process-lines elpamr-tar-executable "--version")))
-         (result (and first-line (string-match-p "^[ \t]*bsdtar" first-line))))
+  (let* ((output (mapconcat #'identity (process-lines elpamr-tar-executable "--version") " "))
+         (result (and output (string-match-p "^[ \t]*bsdtar" output))))
     (elpamr--log "Detected tar variant: %s" (if result "BSD" "GNU"))
     result))
 
@@ -264,7 +264,7 @@ command compatible with BSD tar instead of GNU tar."
 (defun elpamr-version ()
   "Current version."
   (interactive)
-  (message "2.1.4"))
+  (message "2.1.5"))
 
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed (&optional output-directory recreate-directory)
