@@ -134,14 +134,12 @@ from program output."
     line))
 
 (defun elpamr--log-message (format-string &rest args)
-  "Format ARGS with FORMAT-STRING, add the result to the log, and
-display it."
+  "Format ARGS with FORMAT-STRING, add the result to the log and display it."
   (apply #'elpamr--log format-string args)
   (apply #'message format-string args))
 
 (defun elpamr--log-error (format-string &rest args)
-  "Format ARGS with FORMAT-STRING, add the result to the log, and
-signal an error."
+  "Format ARGS with FORMAT-STRING, add the result to the log and signal an error."
   (apply #'elpamr--log format-string args)
   (apply #'error format-string args))
 
@@ -152,7 +150,9 @@ signal an error."
 (defun elpamr--is-bsd-tar ()
   "Are we using BSD tar instead of GNU tar?"
   (let* ((output (mapconcat #'identity (process-lines elpamr-tar-executable "--version") " "))
-         (result (and output (string-match-p "^[ \t]*bsdtar" output))))
+         ;; @see https://github.com/redguardtoo/elpa-mirror/issues/37
+         ;; extra error message insert extra whitespace before "bsdtar"
+         (result (and output (string-match-p "\\(^[ \t]*\\|[ \t]\\)bsdtar" output))))
     (elpamr--log "Detected tar variant: %s" (if result "BSD" "GNU"))
     result))
 
