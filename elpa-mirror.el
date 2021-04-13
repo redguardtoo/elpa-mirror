@@ -121,27 +121,35 @@ The hook function have one argument: output-directory."
   :group 'elpa-mirror
   :type 'hook)
 
+(defcustom elpamr-enable-log nil
+  "Enable log."
+  :type 'boolean
+  :group 'elpa-mirror)
+
 (defvar elpamr--log-buffer "*elpa-mirror log*"
   "Destination buffer for log messages and command output.")
 
 (defun elpamr--log (format-string &rest args)
   "Format ARGS with FORMAT-STRING, add the result to the log, and return it.
-The log line will be prepended with an asterisk to distinguish it
+The log line will be pre-pended with an asterisk to distinguish it
 from program output."
-  (let ((line (apply #'format format-string args)))
-    (with-current-buffer (get-buffer-create elpamr--log-buffer)
-      (insert "* " line "\n"))
-    line))
+  (when elpamr-enable-log
+    (let ((line (apply #'format format-string args)))
+      (with-current-buffer (get-buffer-create elpamr--log-buffer)
+        (insert "* " line "\n"))
+      line)))
 
 (defun elpamr--log-message (format-string &rest args)
   "Format ARGS with FORMAT-STRING, add the result to the log and display it."
-  (apply #'elpamr--log format-string args)
-  (apply #'message format-string args))
+  (when elpamr-enable-log
+    (apply #'elpamr--log format-string args)
+    (apply #'message format-string args)))
 
 (defun elpamr--log-error (format-string &rest args)
   "Format ARGS with FORMAT-STRING, add the result to the log and signal an error."
-  (apply #'elpamr--log format-string args)
-  (apply #'error format-string args))
+  (when elpamr-enable-log
+(apply #'elpamr--log format-string args)
+  (apply #'error format-string args)))
 
 (defun elpamr--package-desc (item)
   "Extract package information from ITEM."
@@ -200,15 +208,23 @@ Return `(list package-name integer-version-number)' or nil."
           (elpamr--get-dependency final-pkg)
           (elpamr--clean-package-description (elpamr--get-summary final-pkg))))
 
-(defun elpamr--call-process-check (program &rest call-process-args)
-  "Call `call-process' with the arguments to this function.
+(defun elpamr--call-process-check (arguments)
+  "Call run tar program with the ARGUMENTS.
 Log and signal an error if it exits with a non-zero status."
-  (let ((exit-status (apply #'call-process program call-process-args)))
-    (if (not (= exit-status 0))
-        (elpamr--log-error
-         "Program %s exited with non-zero status %s, see the %s buffer for details"
-         program exit-status elpamr--log-buffer)
-      exit-status)))
+  (let ((exit-status (apply #'call-process
+                            elpamr-tar-executable
+                            nil
+                            (and elpamr-enable-log elpamr--log-buffer)
+                            nil
+                            arguments)))
+    (cond
+     ((not (= exit-status 0))
+      (elpamr--log-error
+       "Program %s exited with non-zero status %s, see the %s buffer for details"
+       elpamr-tar-executable exit-status elpamr--log-buffer)
+      )
+     (t
+      exit-status))))
 
 (defun elpamr--run-tar (working-dir out-file dir-to-archive is-bsd-tar)
   "Run tar in order to archive DIR-TO-ARCHIVE into OUT-FILE.
@@ -220,6 +236,8 @@ command compatible with BSD tar instead of GNU tar."
   (let* ((exclude-opts (mapcar (lambda (s)
                                  (concat "--exclude=" (if is-bsd-tar "^" "") s))
                                elpamr-tar-command-exclude-patterns))
+         ;; set pwd of process
+         (default-directory working-dir)
          ;; create tar using GNU tar
          (tar-args
           `("cf" ,out-file
@@ -241,12 +259,6 @@ command compatible with BSD tar instead of GNU tar."
                 '("--owner=root:0"
                   "--group=root:0"
                   "--mtime=1970-01-01 00:00:00 UTC"))
-            ;; It's important that tar starts in the package's parent directory
-            ;; (using the `-C' option) and gets passed just the name (not the
-            ;; full path) of the package's directory. This is because we want
-            ;; anchored exclude patterns like `company-*/bin' to do what the
-            ;; user expects.
-            "-C" ,working-dir
             "--" ,dir-to-archive))
          ;; Don't archive macOS' file properties (see
          ;; <https://superuser.com/q/259703>).
@@ -254,16 +266,40 @@ command compatible with BSD tar instead of GNU tar."
                                   (cons "COPYFILE_DISABLE=" process-environment)
                                 process-environment)))
     (elpamr--log "Running tar: %S %S" elpamr-tar-executable tar-args)
-    (apply #'elpamr--call-process-check
-           elpamr-tar-executable nil
-           elpamr--log-buffer nil
-           tar-args)))
+    (elpamr--call-process-check tar-args)))
 
 ;;;###autoload
 (defun elpamr-version ()
   "Current version."
   (interactive)
   (message "2.1.5"))
+
+(defun elpamr--win-executable-find (exe)
+  "Find EXE on windows."
+  (let* ((drivers '("c" "d" "e" "f"))
+          (i 0)
+          j
+          (dirs '(":\\\\cygwin64\\\\bin\\\\"
+                 ":\\\\msys64\\\\usr\\\\bin\\\\"))
+          rlt)
+     (while (and (not rlt)
+                 (< i (length dirs)))
+       (setq j 0)
+       (while (and (not rlt)
+                   (< j (length drivers)))
+         (setq rlt (executable-find (concat (nth j drivers) (nth i dirs) exe)))
+         (setq j (1+ j)))
+       (setq i (1+ i)))
+     (unless rlt
+       ;; nothing found, fall back to exe
+       (setq rlt exe))
+     rlt))
+
+(defun elpamr-double-check-executable ()
+  "Make sure `elpamr-tar-executable' is executable."
+  (when (and (not (file-executable-p elpamr-tar-executable))
+             (eq system-type 'windows-nt))
+    (setq elpamr-tar-executable (elpamr--win-executable-find elpamr-tar-executable))))
 
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed (&optional output-directory recreate-directory)
@@ -279,11 +315,17 @@ will be used as mirror package's output directory:
 When RECREATE-DIRECTORY is non-nil, OUTPUT-DIRECTORY
 will be deleted and recreated."
   (interactive)
+
+  ;; find tar program on Windows if GNU tar from Cygwin/MYSYS2 is installed
+  ;; and current `elpamr-tar-executable' is NOT executable.
+  (elpamr-double-check-executable)
+
   (let (final-pkg-list)
 
     ;; Erase the log (in case of multiple consecutive calls to this function).
-    (with-current-buffer (get-buffer-create elpamr--log-buffer)
-      (erase-buffer))
+    (when elpamr-enable-log
+      (with-current-buffer (get-buffer-create elpamr--log-buffer)
+        (erase-buffer)))
 
     ;; Since Emacs 27, `package-initialize' is optional.
     ;; but we still need it to initialize `package-alist'.
@@ -336,7 +378,8 @@ will be deleted and recreated."
           (unless (or (member dir '("archives" "." ".."))
                       (not (elpamr--extract-info-from-dir dir)))
             (elpamr--run-tar pkg-dir
-                             (concat (elpamr--fullpath output-directory dir) ".tar")
+                             ;; use relative path in case we use cygwin tar
+                             (file-relative-name (concat (elpamr--fullpath output-directory dir) ".tar") pkg-dir)
                              dir
                              is-bsd-tar)
             (setq cnt (1+ cnt))
