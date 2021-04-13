@@ -164,8 +164,7 @@ from program output."
 (defun elpamr--extract-info-from-dir (dirname)
   "Extract information from DIRNAME.
 Return `(list package-name integer-version-number)' or nil."
-  (interactive)
-  (when (string-match "\\(.*\\)-\\([0-9.]+\\)$" dirname)
+  (when (string-match "\\(.*\\)-\\([0-9][0-9a-z.]+\\)$" dirname)
     (list (match-string 1 dirname)
           (split-string (match-string 2 dirname) "\\."))))
 
