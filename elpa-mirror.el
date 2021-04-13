@@ -239,8 +239,8 @@ command compatible with BSD tar instead of GNU tar."
             ;; <http://h2.jaguarpaw.co.uk/posts/reproducible-tar/> and
             ;; <https://www.gnu.org/software/tar/manual/html_node/PAX-keywords.html>).
             ,@(unless is-bsd-tar
-                '("--sort=name"
-                  "--owner=root:0" "--group=root:0"
+                '("--owner=root:0"
+                  "--group=root:0"
                   "--mtime=1970-01-01 00:00:00 UTC"))
             ;; It's important that tar starts in the package's parent directory
             ;; (using the `-C' option) and gets passed just the name (not the
