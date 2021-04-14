@@ -54,7 +54,7 @@
 ;;   - Restart Emacs
 ;;
 ;; Tips,
-;;   - `elpamr-exclude-packages' exclude packages
+;;   - `elpamr-exclude-packages' excludes packages
 ;;   - `elpamr-tar-command-exclude-patterns' excludes file and directories in
 ;;   package directory.
 ;;   - You can also setup repositories on Dropbox and Github.
