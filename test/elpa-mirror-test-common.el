@@ -62,7 +62,8 @@
        ((string-match "/lex\.tar$" file)
         (should (string-match "/lex" (elpa-mirror-test-tar-summary file))))
 
-       ((string-match "/csv-mode.*\.tar$" file)
+       ;; don't know where "csv-mode-1.15.signed.tar" comes from on CI
+       ((string-match "/csv-mode-[0-9.]*.tar$" file)
         (should (string-match "/csv-mode.el$" (elpa-mirror-test-tar-summary file))))))))
 
 (provide 'elpa-mirror-test-common)
