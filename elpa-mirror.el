@@ -256,8 +256,9 @@ command compatible with BSD tar instead of GNU tar."
             ;; <http://h2.jaguarpaw.co.uk/posts/reproducible-tar/> and
             ;; <https://www.gnu.org/software/tar/manual/html_node/PAX-keywords.html>).
             ,@(unless is-bsd-tar
-                '("--owner=root:0"
-                  "--group=root:0"
+                ;; @see https://github.com/redguardtoo/elpa-mirror/issues/41
+                '("--owner=root"
+                  "--group=root"
                   "--mtime=1970-01-01 00:00:00 UTC"))
             "--" ,dir-to-archive))
          ;; Don't archive macOS' file properties (see
