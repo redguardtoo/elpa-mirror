@@ -93,8 +93,8 @@ The patterns use shell glob syntax, not regexp syntax:
 * Special characters are quoted with `\\'.
 
 The patterns are anchored, meaning that they always start
-matching at the start of the path. This is done by passing the
-`--anchored' option when running with GNU tar, or prepending `^'
+matching at the start of the path.  This is done by passing the
+`--anchored' option when running with GNU tar, or pre-pending `^'
 to every pattern when running with BSD tar.
 
 Examples:

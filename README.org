@@ -11,6 +11,8 @@ Create local Emacs package repository from *installed packages* so package upgra
 - The repository could be hosted on USB/Dropbox/GitHub. So you can install packages behind corp firewall
 - Tested with Emacs 25, 26, 27 on OSX/Cygwin/Windows10/Linux
 * Install
+CLI program tar is required.  It's already installed on Windows10/Linux/macOS.
+
 - Download =elpa-mirror.el= to somewhere (say =~/.emacs.d/site-lisp/elpa-mirror/=)
 - Add below code into your ~/.emacs,
 #+begin_src elisp
