@@ -1,7 +1,7 @@
 * elpa-mirror
-
-[[https://travis-ci.org/redguardtoo/elpa-mirror][https://travis-ci.org/redguardtoo/elpa-mirror.svg?branch=master]]
-[[http://melpa.org/#/elpa-mirror][file:http://melpa.org/packages/elpa-mirror-badge.svg]] [[http://stable.melpa.org/#/elpa-mirror][file:http://stable.melpa.org/packages/elpa-mirror-badge.svg]]
+[[https://github.com/redguardtoo/elpa-mirror/actions/workflows/test.yml][https://github.com/redguardtoo/elpa-mirror/actions/workflows/test.yml/badge.svg]]
+[[http://melpa.org/#/elpa-mirror][file:http://melpa.org/packages/elpa-mirror-badge.svg]]
+[[http://stable.melpa.org/#/elpa-mirror][file:http://stable.melpa.org/packages/elpa-mirror-badge.svg]]
 
 Create local Emacs package repository from *installed packages* so package upgrade never breaks.
 
