@@ -23,18 +23,41 @@ CLI program tar is required.  It's already installed on Windows10/Linux/macOS.
 * Usage
 =M-x elpamr-create-mirror-for-installed= to create local repository.
 
-To use the repository =~/myelpa/=, insert below code into your =~/.emacs=,
-#+begin_src elisp
-;; myelpa is the ONLY repository now, dont forget trailing slash in the directory
-(setq package-archives '(("myelpa" . "~/myelpa/")))
-#+end_src
-
 To update existing local repository, run =M-x elpamr-create-mirror-for-installed= again.
 
 BTW, you can run =elpa-mirror.el= as a independent script,
 #+begin_src sh
 mkdir -p ~/myelpa && emacs --batch -l ~/.emacs.d/init.el -l ~/any-directory-you-prefer/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
 #+end_src
+
+To use the local repository =~/myelpa/=, insert below code into your =~/.emacs=,
+#+begin_src elisp
+;; myelpa is the ONLY repository now, dont forget trailing slash in the directory
+(setq package-archives '(("myelpa" . "~/myelpa/")))
+#+end_src
+
+** Repository on Dropbox
+Insert below code into =~/.emacs=:
+#+begin_src elisp
+;; add-to-list will not override default elpa.
+;; So now you have two repositories.
+;; One is GNU elpa. Another is myelpa
+(add-to-list 'package-archives
+             '("myelpa" . "https://dl.dropboxusercontent.com/u/858862/myelpa/"))
+#+end_src
+
+** Repository on GitHub
+My repository is [[https://github.com/redguardtoo/myelpa]].
+
+Insert below code into =.emacs=:
+#+begin_src elisp
+;; add-to-list will not override default elpa.
+;; So now you have two repositories.
+;; One is GNU elpa. Another is myelpa
+(add-to-list 'package-archives
+             '("myelpa" . "https://raw.githubusercontent.com/redguardtoo/myelpa/master/"))
+#+end_src
+
 * Tips
 ** Exclude packages
 See =elpamr-exclude-packages=.
@@ -44,23 +67,7 @@ See =elpamr-tar-command-exclude-patterns=.
 #+begin_src elisp
 (setq elpamr-default-output-directory "~/myelpa")
 #+end_src
-** Repository on Dropbox
-Insert below code into =~/.emacs=:
-#+begin_src elisp
-;; all-to-list will not override default elpa.
-;; So now you have two repositories.
-;; One is GNU elpa. Another is myelpa
-(add-to-list 'package-archives
-             '("myelpa" . "https://dl.dropboxusercontent.com/u/858862/myelpa/"))
-#+end_src
-** Repository on GitHub
-My repository is [[https://github.com/redguardtoo/myelpa]].
 
-Insert below code into =.emacs=:
-#+begin_src elisp
-(add-to-list 'package-archives
-             '("myelpa" . "https://raw.githubusercontent.com/redguardtoo/myelpa/master/"))
-#+end_src
-* Report bug
+* Report a Bug
 
 Reproduce the bug, report it at [[https://github.com/redguardtoo/elpa-mirror]], and attach the contents of the =*elpa-mirror log*= buffer.
