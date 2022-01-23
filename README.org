@@ -63,6 +63,19 @@ Insert below code into =.emacs=:
 See =elpamr-exclude-packages=.
 ** Exclude files/directories in package directory
 See =elpamr-tar-command-exclude-patterns=.
+
+=elpamr-exclude-patterns-filter-function= lets users define a filter function to exclude files and directories per package. The function returns the result to replace =elpamr-tar-command-exclude-patterns=.
+
+Below setup adds directory "bin/" into package "vagrant-tramp".
+#+begin_src elisp
+(setq elpamr-exclude-patterns-filter-function
+      (lambda (package-dir)
+        (let ((patterns elpamr-tar-command-exclude-patterns))
+          (when (string-match "vagrant-tramp" package-dir)
+            (setq patterns (remove "*/bin" patterns)))
+          patterns)))
+#+end_src
+
 ** Change output directory,
 #+begin_src elisp
 (setq elpamr-default-output-directory "~/myelpa")
