@@ -1,21 +1,30 @@
 SHELL = /bin/sh
 EMACS ?= emacs
 PROFILER =
+RM= @rm -rf
+EMACS_BATCH_OPTS=--batch -Q \
+-l elpa-mirror.el \
+--eval "(setq my-test-dir (file-truename \"test\"))"
 
-.PHONY: test
+.PHONY: test deps clean compile
 
 # Delete byte-compiled files etc.
 clean:
-	@rm -f *~
-	@rm -f \#*\#
-	@rm -f *.elc
-	@rm -rf test/tar test/bsdtar
+	$(RM) *~
+	$(RM) \#*\#
+	$(RM) *.elc
+	$(RM) tests/tar
+	$(RM) tests/bsdtar
 
 deps:
-	$(EMACS) -batch --eval "(setq my-test-dir (file-truename \"test\"))" -l elpa-mirror.el -l test/elpa-mirror-test-common.el -Q -l test/elpa-mirror-test-deps.el
+	@$(EMACS) $(EMACS_BATCH_OPTS) -l tests/elpa-mirror-test-common.el -l tests/elpa-mirror-test-deps.el
+
+compile:
+	$(RM) *.elc
+	@$(EMACS) $(EMACS_BATCH_OPTS) -l tests/my-byte-compile.el 2>&1 | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
 
 # Run tests.
-test: clean deps
-	mkdir -p test/tar test/bsdtar
-	$(EMACS) -batch -Q --eval "(setq my-test-dir (file-truename \"test\"))" -l elpa-mirror.el -l test/elpa-mirror-test-common.el -l test/elpa-mirror-test-gnu-tar.el
-	$(EMACS) -batch -Q --eval "(setq my-test-dir (file-truename \"test\"))" -l elpa-mirror.el -l test/elpa-mirror-test-common.el -l test/elpa-mirror-test-bsd-tar.el
+test: clean deps compile
+	@mkdir -p tests/tar tests/bsdtar
+	@$(EMACS) $(EMACS_BATCH_OPTS) -l tests/elpa-mirror-test-common.el -l tests/elpa-mirror-test-gnu-tar.el
+	@$(EMACS) $(EMACS_BATCH_OPTS) -l tests/elpa-mirror-test-common.el -l tests/elpa-mirror-test-bsd-tar.el

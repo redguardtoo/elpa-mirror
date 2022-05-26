@@ -125,8 +125,8 @@ it to match nothing."
 
 (defcustom elpamr-exclude-patterns-filter-function nil
   "Filter `elpamr-tar-command-exclude-patterns' before using it per package.
-It's a function with one parameter which is package directory being processed.
-The function returns the result to replace `elpamr-tar-command-exclude-patterns'."
+A function with one parameter which is the package directory.
+It returns the result to replace `elpamr-tar-command-exclude-patterns'."
   :group 'elpa-mirror
   :type 'hook)
 
