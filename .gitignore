@@ -1,6 +1,7 @@
 *.tar
 tests/tar/
 tests/bsdtar/
+test-package-output
 TAGS
 
 ### https://raw.github.com/github/gitignore/073727ccd9b0ec0b39440fb7673034f04f5d1302/Global/Emacs.gitignore

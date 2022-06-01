@@ -56,15 +56,15 @@
         (let ((file-content (with-temp-buffer
                               (insert-file-contents file)
                               (buffer-string))))
-          (should (string-match "(csv-mode " file-content))
+          (should (string-match "(cobol-mode " file-content))
           (should (string-match "(lex " file-content))))
 
        ((string-match "/lex\.tar$" file)
         (should (string-match "/lex" (elpa-mirror-test-tar-summary file))))
 
-       ;; don't know where "csv-mode-1.15.signed.tar" comes from on CI
-       ((string-match "/csv-mode-[0-9.]*.tar$" file)
-        (should (string-match "/csv-mode.el$" (elpa-mirror-test-tar-summary file))))))))
+       ;; don't know where "*.signed.tar" comes from on CI
+       ((string-match "/cobol-mode-[0-9.]*.tar$" file)
+        (should (string-match "/cobol-mode.el$" (elpa-mirror-test-tar-summary file))))))))
 
 (provide 'elpa-mirror-test-common)
 ;;; elpa-mirror-test-common.el ends here

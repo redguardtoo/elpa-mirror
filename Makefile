@@ -4,7 +4,7 @@ PROFILER =
 RM= @rm -rf
 EMACS_BATCH_OPTS=--batch -Q \
 -l elpa-mirror.el \
---eval "(setq my-test-dir (file-truename \"test\"))"
+--eval "(setq my-test-dir (file-truename \"test-package-output\"))"
 
 .PHONY: test deps clean compile
 
@@ -19,7 +19,7 @@ clean:
 deps:
 	@$(EMACS) $(EMACS_BATCH_OPTS) -l tests/elpa-mirror-test-common.el -l tests/elpa-mirror-test-deps.el
 
-compile:
+compile: deps
 	$(RM) *.elc
 	@$(EMACS) $(EMACS_BATCH_OPTS) -l tests/my-byte-compile.el 2>&1 | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
 

@@ -26,7 +26,8 @@
 
 (package-initialize)
 (package-refresh-contents)
-(dolist (pkg '(csv-mode lex))
+(dolist (pkg '(cobol-mode lex))
+  (message "installing package: %s" pkg)
   (unless (package-installed-p pkg) (package-install pkg)))
 
 (defun elpa-mirror-test-create-myelpa (tar-program)
