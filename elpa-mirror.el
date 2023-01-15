@@ -91,6 +91,7 @@
 (defcustom elpamr-tar-command-exclude-patterns
   '("*.elc"
     "*~"
+    "*autoloads.el"
     "*.so"
     "*.dylib"
     "*.dll"
@@ -395,23 +396,26 @@ will be deleted and recreated."
     (when (and (> (length final-pkg-list) 0)
                output-directory
                (file-directory-p output-directory))
-
-      (let* ((pkg-dir (file-truename package-user-dir))
-             (dirs (directory-files pkg-dir))
-             (is-bsd-tar (elpamr--is-bsd-tar))
-             (cnt 0))
-        (dolist (dir dirs)
-          (unless (or (member dir '("archives" "." ".."))
-                      (not (elpamr--extract-info-from-dir dir)))
-            (elpamr--run-tar pkg-dir
-                             ;; use relative path in case we use cygwin tar
-                             (file-relative-name (concat (elpamr--fullpath output-directory dir) ".tar") pkg-dir)
-                             dir
+      (let ((tmp-dir (make-temp-file "elpa" t))
+            (cnt 0))
+        (dolist (package final-pkg-list)
+          (let* ((pkg-dir (package-desc-dir (car (cdr package))))
+                 (name (package-desc-name (car (cdr package))))
+                 (version-str (package-version-join (package-desc-version (car (cdr package)))))
+                 (name-fixed (format "%s-%s" name version-str))
+                 (is-bsd-tar (elpamr--is-bsd-tar)))
+            (copy-directory pkg-dir (elpamr--fullpath tmp-dir name-fixed))
+            (elpamr--run-tar tmp-dir
+                             (file-relative-name
+                              (concat
+                               (elpamr--fullpath output-directory name-fixed) ".tar")
+                              pkg-dir)
+                             name-fixed
                              is-bsd-tar)
-            (setq cnt (1+ cnt))
             (message "Creating *.tar... %2d%% (%s)"
-                     (/ (* cnt 100) (length dirs))
-                     dir))))
+                     (/ (* cnt 100) (length final-pkg-list))
+                     pkg-dir))
+          (setq cnt (1+ cnt))))
 
       ;; output archive-contents
       (elpamr--log-message "Creating archive-contents...")
