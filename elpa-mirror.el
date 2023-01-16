@@ -5,7 +5,7 @@
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
 ;; Package-Requires: ((emacs "25.1"))
-;; Version: 2.2.0
+;; Version: 2.2.1
 ;; Keywords: tools
 ;;
 ;; This file is not part of GNU Emacs.
@@ -192,13 +192,6 @@ from program output."
   (unless (member (symbol-name (car pkg)) elpamr-exclude-packages)
     pkg))
 
-(defun elpamr--extract-info-from-dir (dirname)
-  "Extract information from DIRNAME.
-Return `(list package-name integer-version-number)' or nil."
-  (when (string-match "\\(.*\\)-\\([0-9][0-9a-z.]+\\)$" dirname)
-    (list (match-string 1 dirname)
-          (split-string (match-string 2 dirname) "\\."))))
-
 (defun elpamr--fullpath (parent file)
   "Full path of 'PARENT/FILE'."
   (let* ((result (file-truename (concat (file-name-as-directory parent) file))))
@@ -299,7 +292,7 @@ command compatible with BSD tar instead of GNU tar."
 (defun elpamr-version ()
   "Current version."
   (interactive)
-  (message "2.2.0"))
+  (message "2.2.1"))
 
 (defun elpamr--win-executable-find (exe)
   "Find EXE on windows."
@@ -397,25 +390,36 @@ will be deleted and recreated."
                output-directory
                (file-directory-p output-directory))
       (let ((tmp-dir (make-temp-file "elpa" t))
+            (is-bsd-tar (elpamr--is-bsd-tar))
             (cnt 0))
+
         (dolist (package final-pkg-list)
           (let* ((pkg-dir (package-desc-dir (car (cdr package))))
                  (name (package-desc-name (car (cdr package))))
                  (version-str (package-version-join (package-desc-version (car (cdr package)))))
                  (name-fixed (format "%s-%s" name version-str))
-                 (is-bsd-tar (elpamr--is-bsd-tar)))
-            (copy-directory pkg-dir (elpamr--fullpath tmp-dir name-fixed))
-            (elpamr--run-tar tmp-dir
-                             (file-relative-name
-                              (concat
-                               (elpamr--fullpath output-directory name-fixed) ".tar")
-                              pkg-dir)
+                 (package-parent-dir-temp-p (not (string-match (concat "^" (file-truename package-user-dir))
+                                                               pkg-dir)))
+                 (package-parent-dir (cond
+                                      (package-parent-dir-temp-p
+                                       tmp-dir)
+                                      (t
+                                       package-user-dir))))
+
+            (when package-parent-dir-temp-p
+              (copy-directory pkg-dir (elpamr--fullpath tmp-dir name-fixed)))
+
+            (elpamr--run-tar package-parent-dir
+                             (file-relative-name (concat (elpamr--fullpath output-directory name-fixed) ".tar")
+                                                 package-parent-dir)
                              name-fixed
                              is-bsd-tar)
             (message "Creating *.tar... %2d%% (%s)"
                      (/ (* cnt 100) (length final-pkg-list))
                      pkg-dir))
-          (setq cnt (1+ cnt))))
+          (setq cnt (1+ cnt)))
+        ;; clean up temp directory
+        (delete-directory tmp-dir t))
 
       ;; output archive-contents
       (elpamr--log-message "Creating archive-contents...")
