@@ -321,6 +321,11 @@ command compatible with BSD tar instead of GNU tar."
              (eq system-type 'windows-nt))
     (setq elpamr-tar-executable (elpamr--win-executable-find elpamr-tar-executable))))
 
+(defun elpamr-delete-directory (directory)
+  "Delete DIRECTORY."
+  (ignore-errors
+    (delete-directory directory t)))
+
 ;;;###autoload
 (defun elpamr-create-mirror-for-installed (&optional output-directory recreate-directory)
   "Export installed packages into a new directory.
@@ -380,7 +385,7 @@ will be deleted and recreated."
     (when (and recreate-directory
                (file-directory-p output-directory))
       (elpamr--log-message "Re-creating %s" output-directory)
-      (delete-directory output-directory t))
+      (elpamr-delete-directory output-directory))
 
     ;; Create output directory if it does not exist.
     (unless (file-directory-p output-directory)
@@ -419,7 +424,7 @@ will be deleted and recreated."
                      pkg-dir))
           (setq cnt (1+ cnt)))
         ;; clean up temp directory
-        (delete-directory tmp-dir t))
+        (elpamr-delete-directory tmp-dir))
 
       ;; output archive-contents
       (elpamr--log-message "Creating archive-contents...")
