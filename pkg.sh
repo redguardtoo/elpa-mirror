@@ -1,6 +1,6 @@
 #!/bin/bash
 name=elpa-mirror
-version=2.2.1
+version=2.2.2
 pkg=$name-$version
 mkdir $pkg
 cp *.el $pkg
