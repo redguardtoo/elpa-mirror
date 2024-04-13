@@ -91,6 +91,8 @@
 (defcustom elpamr-tar-command-exclude-patterns
   '("*.elc"
     "*~"
+    "*/.gitignore"
+    "*/.git"
     "*autoloads.el"
     "*.so"
     "*.dylib"
@@ -406,9 +408,8 @@ will be deleted and recreated."
 
         (dolist (package final-pkg-list)
           (let* ((pkg-dir (package-desc-dir (car (cdr package))))
-                 (name (package-desc-name (car (cdr package))))
                  (version-str (package-version-join (package-desc-version (car (cdr package)))))
-                 (name-fixed (format "%s-%s" name version-str))
+                 (pkg-dir-name (format "%s-%s" (package-desc-name (car (cdr package))) version-str))
                  (package-parent-dir-temp-p (not (string-match (concat "^" (file-truename package-user-dir))
                                                                pkg-dir)))
                  (package-parent-dir (cond
@@ -418,12 +419,14 @@ will be deleted and recreated."
                                        package-user-dir))))
 
             (when package-parent-dir-temp-p
-              (copy-directory pkg-dir (elpamr--fullpath tmp-dir name-fixed)))
+              (copy-directory pkg-dir (elpamr--fullpath tmp-dir pkg-dir-name)))
 
             (elpamr--run-tar package-parent-dir
-                             (file-relative-name (concat (elpamr--fullpath output-directory name-fixed) ".tar")
+                             (file-relative-name (concat (elpamr--fullpath output-directory pkg-dir-name) ".tar")
                                                  package-parent-dir)
-                             name-fixed
+                             ;; Since emacs 29, package might install from git repository
+                             ;; which doesn't create a directory containing version number
+                             (if package-parent-dir-temp-p pkg-dir-name (file-name-nondirectory pkg-dir))
                              is-bsd-tar)
             (message "Creating *.tar... %2d%% (%s)"
                      (/ (* cnt 100) (length final-pkg-list))
