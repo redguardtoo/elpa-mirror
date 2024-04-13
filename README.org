@@ -6,15 +6,14 @@
 Create local Emacs package repository from *installed packages* so package upgrade never breaks.
 
 * Why
-- Emacs Lisp compile file (*.elc) is not portable for different versions of Emacs. So =emacs.d= copied from higher version of Emacs might crash in lower version of Emacs
-- Package installation is fast. 15 seconds to install 115 packages
-- The repository could be hosted on USB/Dropbox/GitHub. So you can install packages behind corp firewall
-- Tested with Emacs 25, 26, 27, 28 on OSX/Cygwin/Windows10/Linux
+- Package installation is fast. It takes only 15 seconds to install 115 packages
+- The package repository could be hosted on USB/Dropbox/GitHub
+- Tested with Emacs 27, 28 on OSX/Cygwin/Windows10/Linux
 * Install
-CLI program tar is required.  It's already installed on Windows10/Linux/macOS.
+CLI program "tar" is required.  It's already installed on Windows10/Linux/macOS.
 
 - Download =elpa-mirror.el= to somewhere (say =~/.emacs.d/site-lisp/elpa-mirror/=)
-- Add below code into your ~/.emacs,
+- Add below code into "~/.emacs",
 #+begin_src elisp
 (add-to-list 'load-path "~/.emacs.d/site-lisp/elpa-mirror")
 (require 'elpa-mirror)
@@ -25,12 +24,12 @@ CLI program tar is required.  It's already installed on Windows10/Linux/macOS.
 
 To update existing local repository, run =M-x elpamr-create-mirror-for-installed= again.
 
-BTW, you can run =elpa-mirror.el= as a independent script,
+BTW, =elpa-mirror.el= can run as an independent script,
 #+begin_src sh
 mkdir -p ~/myelpa && emacs --batch -l ~/.emacs.d/init.el -l ~/any-directory-you-prefer/elpa-mirror.el --eval='(setq elpamr-default-output-directory "~/myelpa")' --eval='(elpamr-create-mirror-for-installed)'
 #+end_src
 
-To use the local repository =~/myelpa/=, insert below code into your =~/.emacs=,
+To use the local repository =~/myelpa/=, insert below code into =~/.emacs=,
 #+begin_src elisp
 ;; myelpa is the ONLY repository now, dont forget trailing slash in the directory
 (setq package-archives '(("myelpa" . "~/myelpa/")))
@@ -83,4 +82,4 @@ Below setup adds directory "bin/" into package "vagrant-tramp".
 
 * Report a Bug
 
-Reproduce the bug, report it at [[https://github.com/redguardtoo/elpa-mirror]], and attach the contents of the =*elpa-mirror log*= buffer.
+Reproduce the bug, report it at [[https://github.com/redguardtoo/elpa-mirror]], and attach the contents of the buffer =*elpa-mirror log*=.

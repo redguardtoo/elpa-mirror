@@ -1,11 +1,11 @@
 ;;; elpa-mirror.el --- Create local package repository from installed packages
 
-;; Copyright (C) 2014-2020 Chen Bin
+;; Copyright (C) 2014-2024 Chen Bin
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: http://github.com/redguardtoo/elpa-mirror
-;; Package-Requires: ((emacs "25.1"))
-;; Version: 2.2.2
+;; Package-Requires: ((emacs "27.1"))
+;; Version: 2.3.0
 ;; Keywords: tools
 ;;
 ;; This file is not part of GNU Emacs.
@@ -294,7 +294,7 @@ command compatible with BSD tar instead of GNU tar."
 (defun elpamr-version ()
   "Current version."
   (interactive)
-  (message "2.2.2"))
+  (message "2.3.0"))
 
 (defun elpamr--win-executable-find (exe)
   "Find EXE on windows."
