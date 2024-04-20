@@ -8,7 +8,7 @@ Create local Emacs package repository from *installed packages* so package upgra
 * Why
 - Package installation is fast. It takes only 15 seconds to install 115 packages
 - The package repository could be hosted on USB/Dropbox/GitHub
-- Tested with Emacs 27, 28 on OSX/Cygwin/Windows10/Linux
+- Tested with Emacs 27, 28, 29 on OSX/Cygwin/Windows10/Linux
 * Install
 CLI program "tar" is required.  It's already installed on Windows10/Linux/macOS.
 
